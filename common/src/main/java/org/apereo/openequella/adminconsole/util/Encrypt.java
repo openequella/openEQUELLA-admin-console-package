@@ -17,8 +17,6 @@
  */
 package org.apereo.openequella.adminconsole.util;
 
-import javax.annotation.Nullable;
-
 import org.jasypt.util.text.BasicTextEncryptor;
 
 /**

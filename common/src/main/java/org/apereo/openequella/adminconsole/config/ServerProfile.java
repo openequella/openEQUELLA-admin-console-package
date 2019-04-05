@@ -20,8 +20,6 @@ package org.apereo.openequella.adminconsole.config;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 public class ServerProfile {
 	private String uuid;
 	private String url;

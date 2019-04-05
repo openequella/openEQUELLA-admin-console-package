@@ -45,29 +45,35 @@ subprojects {
 }
 
 project(':common') {
+<<<<<<< HEAD
     apply plugin: 'com.github.hierynomus.license'
     dependencies {
         implementation 'com.google.guava:guava:27.0.1-jre'
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
         implementation 'org.jasypt:jasypt:1.9.2'
     }
+=======
+  dependencies {
+      implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+      implementation 'org.jasypt:jasypt:1.9.2'
+  }
+>>>>>>> 783 console launcher
 }
 
 project(':configurator') {
 
-    mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
-    apply plugin: 'com.github.hierynomus.license'
-    apply plugin: 'application'
+  mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
+  apply plugin: 'com.github.hierynomus.license'
+  apply plugin: "application"
+  
+  dependencies {
+    compile project(':common')
 
-    dependencies {
-        compile project(':common')
+    testImplementation "junit:junit:$junitVersion"
+  }
 
-        //implementation 'com.google.guava:guava:27.0.1-jre'
-        testImplementation 'junit:junit:4.12'
-    }
-
-    // TODO: gradle complains if this isn't listed in both positions...
-    mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
+  // FIXME: gradle complains if this isn't listed in both positions...
+  mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
 
     jar {
         manifest {
@@ -76,4 +82,33 @@ project(':configurator') {
                     'Main-Class': mainClassName)
         }
     }
+  }
+}
+
+project(':launcher') {
+
+  mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
+
+  apply plugin: "application"
+
+  group = 'org.apereo.openequella.adminconsole'
+
+  dependencies {
+    compile project(':common')
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+     
+    testImplementation "junit:junit:$junitVersion"
+  }
+
+  // FIXME: gradle complains if this isn't listed in both positions...
+  mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
+
+  jar {
+      manifest {
+          attributes('Implementation-Title': project.name,
+                  'Implementation-Version': project.version,
+                  'Main-Class': mainClassName)
+      }
+  }
 }

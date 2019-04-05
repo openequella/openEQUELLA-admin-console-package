@@ -233,7 +233,6 @@ public class Configurator extends JFrame implements WindowListener, ActionListen
         }
 
         final AppServerEditDialog dialog = new AppServerEditDialog(this, newProfile);
-        dialog.setModal(true);
         dialog.setVisible(true);
 
         if (dialog.getResult() == AppServerEditDialog.RESULT_OK) {
