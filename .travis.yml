@@ -1,0 +1,30 @@
+language: java
+jdk:
+- oraclejdk8
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    -
+before_install:
+- sudo apt-get install -y awscli
+
+install: true
+
+script:
+  - ./gradlew build
+after_success:
+- aws s3 --region us-east-1 cp --recursive build/distributions/ s3://oeq-admin-console-package/`printf %04d $TRAVIS_BUILD_NUMBER`/
+
+
+env:
+  global:
+  - secure: V1+p88l+XriMRrAXitaPOYZQhUxgBFQNHZytr+4+JqTdRRc6UTo6e27gUKK8LMo2agccsu8B/qUB6x36IA0JPMoqcpZUHJ0yAY5C8i70dwm2+x5kyhFHBUezLUyUoHhkpyDXDZ6OrNvUU6DZn5qtgLqRzEzZoOfU6hOX+0oNnmgwHC8MVDW3N1ayUJl2RCYDPivd2e6W+PNH0xbYT9BV+ePoLmPLeDmPV6JOOYNZiQ1PeTNBJnDa3kk6gTAfky5tYkJBGheoJ4cJQjYRhj3g7M1IQ1tRHJ7Mh6xvX6SR6Qq0zSTEfDv4ExV/vsQ7CbI7ltWXiA3zrSB63LCI3yA5a0SRxJvJEUhsSu1c84RAWJ8onPvaLBfJTPmHnzfMghHzTaSoQ3hqFYYla9dn9MZ4zfccDkI2ZKkdRpAeoCMB9U/pc1F0Tij/RLkXroe0az1BnVBpriBDLsKMeKwEDvklF3+EWgR78p+tMDUCygJDp6R0T8OTTZON059jEFvQyMgRgWgwLpzBsMqqaZt4R7DZ4w511RZ3bm9bM1UUxugWx7gihtbLW2/kilDaX7n2+wklSzsHiCdSK3vdcCVEmSTmmqBbOL3pm7oz8dsNBQfWzS/SorGhxbgRJmrKlBmfQgfczGJV9Ibqd0HwpXHGj+afkR2Kpx89s4u5D+NMthV1txI=
+  - secure: ncb1VQqz5U0V+0o2RMtFu3R7oYV0A1XJJvrr38lHTsUw/zasK4CPzRVAIu4v8q6GVNRgCzleAEhc6LuBfE+acKmCegRj7yfKWcND7S6DaMt9bDW+nV+XZuWMYtja7UJ+72MbtSDxerCoi7zXuSI/c+UhG4cUQqC+myLTjrHBWPOFhPs+MxA8rdvsiuNtVwRZXk2DcFBj8/jiNeJzWdTbqObVz1NBjeC/gNDVO3gvuYXyYdg5QfusZvKi5rj7k+RV3zc3mB0yIbekD6ElL1dLgxbZWVbjIt6RlbQ9fNJQG9kVWpTPG4MBGZJedDJdqSfPN/H+Zily/cU9emM9y+y3vHr+9SDax57y24cSNr0MDXHR81LzTJdX3YXpfE+B753KhtnYxE+c50B2oxqWlXdXNH9hd8HYCNuV12lTBB5SzcsvkL0glHDPqDUawM3ckoEoYomiitV0nuinqOdVDXHwjF3MvKjgoBKu2J8aVuUCJ2EFGLsBQ9xFGFniX6dUYLSUJj4j9juqWMywAYzux4WuPrKmnYdRR7gYF3pjNrA1cJKr006Lu8tkI1k6ByvNgjG27OSFapjO3Gb8nehtBUc0tkPZHC8G7C1r8+6ZpvhvL/fSgsmC4W3eNrbxq0Ruk7E1UzIjaFAcD3dD1hd2r9iIencEz+P25mvceJ36EOBatVs=
+
+
