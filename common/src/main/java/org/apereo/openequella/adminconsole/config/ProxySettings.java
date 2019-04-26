@@ -27,10 +27,6 @@ public class ProxySettings {
   private String password;
   private String obsPassword;
 
-  public ProxySettings() {
-    super();
-  }
-
   public String getHost() {
     return host;
   }

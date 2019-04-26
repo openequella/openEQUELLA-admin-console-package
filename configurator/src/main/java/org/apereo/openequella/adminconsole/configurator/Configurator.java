@@ -59,14 +59,14 @@ public class Configurator extends JFrame implements WindowListener, ActionListen
 
     public Configurator() {
         try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
             config = readConfig();
             serverPicker = new ServerPicker(config);
             addServerButton = new JButton("Add Server...");
             editServerButton = new JButton("Edit Server...");
             removeServerButton = new JButton("Remove Server");
             editProxyButton = new JButton("Proxy Settings...");
-
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
             setTitle("Admin console configurator");
             setResizable(false);

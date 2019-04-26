@@ -12,9 +12,8 @@ plugins {
 }
 
 allprojects {
-  apply plugin: "java"
-  apply plugin: "application"
-  apply plugin: "base"
+  apply plugin: 'java'
+  apply plugin: 'base'
   apply plugin: 'nebula.lint'
   
   repositories {
@@ -49,6 +48,11 @@ project(':common') {
 }
 
 project(':configurator') {
+  
+  mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
+
+  apply plugin: 'application'
+
   dependencies {
     compile project(':common')
 
@@ -56,6 +60,7 @@ project(':configurator') {
     testImplementation 'junit:junit:4.12'
   }
 
+  // TODO: gradle complains if this isn't listed in both positions...
   mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
 
   jar {
