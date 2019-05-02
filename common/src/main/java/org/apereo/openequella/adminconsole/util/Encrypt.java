@@ -11,8 +11,8 @@ import org.jasypt.util.text.BasicTextEncryptor;
 public class Encrypt {
 	private static String SECRET_KEY = "IPityTheF00lWhoDon'tLikeHe";
 
-	@Nullable
-	public static String encrypt(@Nullable String value) {
+	
+	public static String encrypt( String value) {
 		if (value != null) {
 			try {
 				BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
@@ -25,8 +25,8 @@ public class Encrypt {
 		return null;
 	}
 
-	@Nullable
-	public static String decrypt(@Nullable String value) {
+	
+	public static String decrypt( String value) {
 		if (value != null && value.length() != 0) {
 			try {
 				BasicTextEncryptor textEncryptor = new BasicTextEncryptor();

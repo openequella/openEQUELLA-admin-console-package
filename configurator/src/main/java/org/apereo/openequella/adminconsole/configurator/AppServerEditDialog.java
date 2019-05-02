@@ -23,7 +23,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -41,6 +40,12 @@ public class AppServerEditDialog extends JDialog implements ActionListener, KeyL
   public static final int RESULT_CANCEL = 0;
   public static final int RESULT_OK = 1;
 
+  private static final String WINDOW_TITLE = "Server Editor";
+  private static final String LABEL_SERVER_NAME = "Server Name:";
+  private static final String LABEL_SERVER_URL = "Server URL:";
+  private static final String BUTTON_SAVE = "Save";
+  private static final String BUTTON_CANCEL = "Cancel";
+
   private int result = RESULT_CANCEL;
 
   private final ServerProfile profile;
@@ -51,18 +56,18 @@ public class AppServerEditDialog extends JDialog implements ActionListener, KeyL
   private final JButton cancelButton;
   
 
-  public AppServerEditDialog(@Nonnull Frame frame) {
+  public AppServerEditDialog(Frame frame) {
     this(frame, new ServerProfile());
   }
 
-  public AppServerEditDialog(@Nonnull Frame frame, @Nonnull ServerProfile profile) {
+  public AppServerEditDialog(Frame frame, ServerProfile profile) {
     super(frame);
 
     this.profile = profile;
     profileField = new JTextField();
     serverField = new JTextField();
-    okButton = new JButton("Save");
-    cancelButton = new JButton("Cancel");
+    okButton = new JButton(BUTTON_SAVE);
+    cancelButton = new JButton(BUTTON_CANCEL);
 
     setup();
 
@@ -73,8 +78,8 @@ public class AppServerEditDialog extends JDialog implements ActionListener, KeyL
   }
 
   private void setup() {
-    final JLabel profileLabel = new JLabel("Server Name:");
-    final JLabel serverLabel = new JLabel("Server URL:");
+    final JLabel profileLabel = new JLabel(LABEL_SERVER_NAME);
+    final JLabel serverLabel = new JLabel(LABEL_SERVER_URL);
 
     profileField.addKeyListener(this);
     serverField.addKeyListener(this);
@@ -105,7 +110,7 @@ public class AppServerEditDialog extends JDialog implements ActionListener, KeyL
     all.add(cancelButton, new Rectangle(3, 5, 1, 1));
 
     setModal(true);
-    setTitle("Server Editor");
+    setTitle(WINDOW_TITLE);
     getContentPane().add(all);
     getRootPane().setDefaultButton(okButton);
 

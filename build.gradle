@@ -43,7 +43,6 @@ project(':common') {
       implementation 'com.google.guava:guava:27.0.1-jre'
       implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
       implementation 'org.jasypt:jasypt:1.9.2'
-      //runtime 'org.jasypt:jasypt:1.9.2'
   }
 }
 
@@ -56,7 +55,7 @@ project(':configurator') {
   dependencies {
     compile project(':common')
 
-    implementation 'com.google.guava:guava:27.0.1-jre'
+    //implementation 'com.google.guava:guava:27.0.1-jre'
     testImplementation 'junit:junit:4.12'
   }
 

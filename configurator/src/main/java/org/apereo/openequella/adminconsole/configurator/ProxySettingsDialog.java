@@ -23,7 +23,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -51,6 +50,17 @@ public class ProxySettingsDialog extends JDialog implements ActionListener, KeyL
   private static final int PROXY_MAX = Short.MAX_VALUE - 1;
   private static final int PROXY_STEP = 1;
 
+  private static final String WINDOW_TITLE = "Proxy Settings";
+  private static final String LABEL_PROXY_HOST = "Proxy Host:";
+  private static final String LABEL_PROXY_PORT = "Proxy Port:";
+  private static final String LABEL_PROXY_REQUIRES_AUTH = "Server requires authentication";
+  private static final String LABEL_PROXY_USERNAME = "Username:";
+  private static final String LABEL_PROXY_PASSWORD = "Password:"; 
+
+  
+  private static final String BUTTON_OK = "OK";
+  private static final String BUTTON_CANCEL = "Cancel";
+
   private final ProxySettings proxySettings;
 
   private int result = RESULT_CANCEL;
@@ -65,7 +75,7 @@ public class ProxySettingsDialog extends JDialog implements ActionListener, KeyL
   private JButton ok;
   private JButton cancel;
 
-  public ProxySettingsDialog(@Nonnull Frame frame, @Nonnull ProxySettings proxySettings) {
+  public ProxySettingsDialog(Frame frame, ProxySettings proxySettings) {
     super(frame);
     this.proxySettings = proxySettings;
     setup();
@@ -87,8 +97,8 @@ public class ProxySettingsDialog extends JDialog implements ActionListener, KeyL
     setupCredentials();
     final JPanel hostPanel = createHostPanel();
 
-    ok = new JButton("OK");
-    cancel = new JButton("Cancel");
+    ok = new JButton(BUTTON_OK);
+    cancel = new JButton(BUTTON_CANCEL);
 
     ok.addActionListener(this);
     cancel.addActionListener(this);
@@ -110,7 +120,7 @@ public class ProxySettingsDialog extends JDialog implements ActionListener, KeyL
 
     updateButtons();
 
-    setTitle("Proxy Settings");
+    setTitle(WINDOW_TITLE);
     setModal(true);
     setResizable(false);
     getContentPane().add(all);
@@ -121,8 +131,8 @@ public class ProxySettingsDialog extends JDialog implements ActionListener, KeyL
   }
 
   protected JPanel createHostPanel() {
-    JLabel hostLabel = new JLabel("Proxy Host:");
-    JLabel portLabel = new JLabel("Proxy Port:");
+    JLabel hostLabel = new JLabel(LABEL_PROXY_HOST);
+    JLabel portLabel = new JLabel(LABEL_PROXY_PORT);
 
     hostField = new JTextField();
     hostField.addKeyListener(this);
@@ -147,8 +157,8 @@ public class ProxySettingsDialog extends JDialog implements ActionListener, KeyL
   }
 
   private void setupCredentials() {
-    JLabel usernameLabel = new JLabel("Username:");
-    JLabel passwordLabel = new JLabel("Password:");
+    JLabel usernameLabel = new JLabel(LABEL_PROXY_USERNAME);
+    JLabel passwordLabel = new JLabel(LABEL_PROXY_PASSWORD);
 
     usernameField = new JTextField();
     passwordField = new JPasswordField();
@@ -164,7 +174,7 @@ public class ProxySettingsDialog extends JDialog implements ActionListener, KeyL
     final int[] rows = { height1, height1 };
     final int[] cols = { width3, TableLayout.FILL };
 
-    credentials = new JGroup("Server requires authentication", false);
+    credentials = new JGroup(LABEL_PROXY_REQUIRES_AUTH, false);
     credentials.addActionListener(this);
     credentials.setInnerLayout(new TableLayout(rows, cols));
 

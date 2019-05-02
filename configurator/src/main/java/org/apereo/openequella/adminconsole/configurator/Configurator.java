@@ -45,6 +45,17 @@ public class Configurator extends JFrame implements WindowListener, ActionListen
 
     private static final int WINDOW_WIDTH = 450;
 
+    private static final String WINDOW_TITLE = "Admin console configurator";
+    private static final String LABEL_SERVERS = "Servers:";
+    private static final String ADD_SERVER_BUTTON = "Add Server...";
+    private static final String EDIT_SERVER_BUTTON = "Edit Server...";
+    private static final String REMOVE_SERVER_BUTTON = "Remove Server";
+    private static final String PROXY_SETTINGS_BUTTON = "Proxy Settings...";
+    private static final String CLONE_SERVER_TITLE = "Clone server?";
+    private static final String PROMPT_CLONE = "Do you want to clone the currently selected server?";
+    private static final String REMOVE_SERVER_TITLE = "Remove server?";
+    private static final String PROMPT_REMOVE = "Are you sure you want to remove this server?";
+
     private final Config config;
 
     private final ServerPicker serverPicker;
@@ -63,12 +74,12 @@ public class Configurator extends JFrame implements WindowListener, ActionListen
 
             config = readConfig();
             serverPicker = new ServerPicker(config);
-            addServerButton = new JButton("Add Server...");
-            editServerButton = new JButton("Edit Server...");
-            removeServerButton = new JButton("Remove Server");
-            editProxyButton = new JButton("Proxy Settings...");
+            addServerButton = new JButton(ADD_SERVER_BUTTON);
+            editServerButton = new JButton(EDIT_SERVER_BUTTON);
+            removeServerButton = new JButton(REMOVE_SERVER_BUTTON);
+            editProxyButton = new JButton(PROXY_SETTINGS_BUTTON);
 
-            setTitle("Admin console configurator");
+            setTitle(WINDOW_TITLE);
             setResizable(false);
             addWindowListener(this);
             setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -113,7 +124,7 @@ public class Configurator extends JFrame implements WindowListener, ActionListen
 
         serverPicker.addActionListener(this);
 
-        JLabel serversLabel = new JLabel("Servers:");
+        JLabel serversLabel = new JLabel(LABEL_SERVERS);
 
         final int height1 = serverPicker.getPreferredSize().height;
         final int[] rows = { height1, height1 };
@@ -214,7 +225,7 @@ public class Configurator extends JFrame implements WindowListener, ActionListen
         final ServerProfile selectedProfile = (ServerProfile) serverPicker.getSelectedItem();
         final ServerProfile newProfile = new ServerProfile();
         if (selectedProfile != null
-                && JOptionPane.showConfirmDialog(this, "Do you want to clone the currently selected server?", "Clone?",
+                && JOptionPane.showConfirmDialog(this, PROMPT_CLONE, CLONE_SERVER_TITLE,
                         JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             newProfile.setName(selectedProfile.getName());
             newProfile.setUrl(selectedProfile.getUrl());
@@ -260,8 +271,8 @@ public class Configurator extends JFrame implements WindowListener, ActionListen
     protected boolean handleRemoveServer(int index) {
         if (index > -1) {
             final ServerProfile profile = (ServerProfile) serverPicker.getSelectedItem();
-            final int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove this server?",
-                    "Are you sure?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            final int result = JOptionPane.showConfirmDialog(this, PROMPT_REMOVE,
+                    REMOVE_SERVER_TITLE, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
             if (result == JOptionPane.YES_OPTION) {
                 serverPicker.removeItemAt(index);

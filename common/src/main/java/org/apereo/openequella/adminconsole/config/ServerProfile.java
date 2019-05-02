@@ -16,11 +16,10 @@
 
 package org.apereo.openequella.adminconsole.config;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
-
-import org.apereo.openequella.adminconsole.util.StringUtils;
 
 public class ServerProfile {
 	private String uuid;
@@ -52,13 +51,13 @@ public class ServerProfile {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object other) {
+	public boolean equals( Object other) {
 		if (other == null) {
 			return false;
 		}
 		if (other instanceof ServerProfile) {
 			final ServerProfile otherProfile = (ServerProfile) other;
-			return StringUtils.bothNullOrEqual(otherProfile.getUuid(), getUuid());
+			return Objects.equals(otherProfile.getUuid(), getUuid());
 		}
 		return false;
 	}
