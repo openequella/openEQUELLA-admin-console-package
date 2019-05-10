@@ -1,14 +1,14 @@
 # admin-console-package
 Project to build a stand-alone admin console (launcher) package
 
-## Building the launcher
+## Building the configurator
 ```
-~$ ./gradlew jar --console=verbose
+~$ ./gradlew :configurator:jar --console=verbose
 ```
 The jar is placed in .../build/libs/
 
 For development, you can run the app via:
 
 ```
-~$ ./gradlew run --console=verbose
+~$ ./gradlew :configurator:run --console=verbose
 ```
