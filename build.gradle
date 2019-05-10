@@ -1,9 +1,3 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-}
-
 plugins {
     id 'java'
     id 'application'
@@ -12,103 +6,66 @@ plugins {
     id 'com.github.hierynomus.license' version '0.15.0'
 }
 
+group = 'org.apereo.openequella.adminconsole'
+version = artifactVersion
+mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
 
-allprojects {
-    apply plugin: 'java'
-    apply plugin: 'base'
-    apply plugin: 'nebula.lint'
-    apply plugin: 'com.github.hierynomus.license'
-    license {
-        strictCheck
-        header = file('../LICENSE')
-    }
-    repositories {
-        jcenter()
-    }
+apply plugin: 'java'
+apply plugin: 'base'
+apply plugin: 'nebula.lint'
+apply plugin: 'com.github.hierynomus.license'
+apply plugin: "application"
 
-    group = 'org.apereo.openequella.adminconsole'
-    version = artifactVersion
+// Gradlelint is broken: https://github.com/nebula-plugins/gradle-lint-plugin/issues/203
+gradleLint.rules = [/*'all-dependency', */'dependency-parentheses', 'duplicate-dependency-class']
 
-    gradleLint.rules = ['all-dependency', 'dependency-parentheses', 'duplicate-dependency-class']
-
-    dependencies {
-        implementation 'org.slf4j:slf4j-api:1.7.26'
-        runtime 'org.slf4j:slf4j-simple:1.6.4'
-    }
+license {
+    strictCheck
+    header = file('../LICENSE')
 }
 
-subprojects {
-    task sourcesJar(type: Jar) {
-        from sourceSets.main.java
-        archiveClassifier = 'sources'
-    }
+dependencies {
+  implementation 'org.slf4j:slf4j-api:1.7.26'
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8' 
+  implementation 'org.jasypt:jasypt:1.9.2'
+  runtimeOnly 'org.slf4j:slf4j-simple:1.6.4'
+  testImplementation "junit:junit:$junitVersion"
 }
 
-project(':common') {
-<<<<<<< HEAD
-    apply plugin: 'com.github.hierynomus.license'
-    dependencies {
-        implementation 'com.google.guava:guava:27.0.1-jre'
-        implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
-        implementation 'org.jasypt:jasypt:1.9.2'
-    }
-=======
-  dependencies {
-      implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
-      implementation 'org.jasypt:jasypt:1.9.2'
-  }
->>>>>>> 783 console launcher
-}
-
-project(':configurator') {
-
-  mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
-  apply plugin: 'com.github.hierynomus.license'
-  apply plugin: "application"
-  
-  dependencies {
-    compile project(':common')
-
-    testImplementation "junit:junit:$junitVersion"
-  }
-
-  // FIXME: gradle complains if this isn't listed in both positions...
-  mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
-
-    jar {
-        manifest {
-            attributes('Implementation-Title': project.name,
-                    'Implementation-Version': project.version,
-                    'Main-Class': mainClassName)
-        }
-    }
+jar {
+  archiveFileName = 'admin.jar'
+  manifest {
+      attributes('Implementation-Title': project.name,
+              'Implementation-Version': project.version,
+              'Main-Class': mainClassName)
   }
 }
 
-project(':launcher') {
-
-  mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
-
-  apply plugin: "application"
-
-  group = 'org.apereo.openequella.adminconsole'
-
-  dependencies {
-    compile project(':common')
-
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
-     
-    testImplementation "junit:junit:$junitVersion"
+task cleanDist() {
+  dependsOn 'clean'
+  doLast {
+    delete 'dist'
   }
+}
 
-  // FIXME: gradle complains if this isn't listed in both positions...
-  mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
+task copyDistArtifacts(type: Copy) {
+  dependsOn 'copyScripts'
 
-  jar {
-      manifest {
-          attributes('Implementation-Title': project.name,
-                  'Implementation-Version': project.version,
-                  'Main-Class': mainClassName)
-      }
-  }
+  from(file('build/libs/admin.jar'))
+  from configurations.default
+  into('dist/lib')
+}
+
+task copyScripts(type: Copy){
+  dependsOn 'cleanDist', 'jar'
+
+  from(file('scripts'))
+  into('dist')
+  include('**/*')
+}
+
+task dist {
+  description 'Copies everything required for the distributable into a dist folder'
+
+  dependsOn 'copyDistArtifacts'
 }
