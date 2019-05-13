@@ -1,7 +1,7 @@
 buildscript {
-  repositories {
-    jcenter()
-  }
+    repositories {
+        jcenter()
+    }
 }
 
 plugins {
@@ -9,64 +9,71 @@ plugins {
     id 'application'
     id 'base'
     id 'nebula.lint' version '9.3.4'
+    id 'com.github.hierynomus.license' version '0.15.0'
 }
 
+
 allprojects {
-  apply plugin: 'java'
-  apply plugin: 'base'
-  apply plugin: 'nebula.lint'
-  
-  repositories {
-    jcenter()
-  }
+    apply plugin: 'java'
+    apply plugin: 'base'
+    apply plugin: 'nebula.lint'
+    apply plugin: 'com.github.hierynomus.license'
+    license {
+        strictCheck
+        header = file('../LICENSE')
+    }
+    repositories {
+        jcenter()
+    }
 
-  group = 'org.apereo.openequella.adminconsole'
-  version = artifactVersion
+    group = 'org.apereo.openequella.adminconsole'
+    version = artifactVersion
 
-  gradleLint.rules = ['all-dependency', 'dependency-parentheses', 'duplicate-dependency-class']
+    gradleLint.rules = ['all-dependency', 'dependency-parentheses', 'duplicate-dependency-class']
 
-  dependencies {
-    implementation 'org.slf4j:slf4j-api:1.7.26'
-    runtime 'org.slf4j:slf4j-simple:1.6.4'
-  }
+    dependencies {
+        implementation 'org.slf4j:slf4j-api:1.7.26'
+        runtime 'org.slf4j:slf4j-simple:1.6.4'
+    }
 }
 
 subprojects {
-  task sourcesJar(type: Jar) {
+    task sourcesJar(type: Jar) {
         from sourceSets.main.java
         archiveClassifier = 'sources'
     }
 }
 
 project(':common') {
-  dependencies {
-      implementation 'com.google.guava:guava:27.0.1-jre'
-      implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
-      implementation 'org.jasypt:jasypt:1.9.2'
-  }
+    apply plugin: 'com.github.hierynomus.license'
+    dependencies {
+        implementation 'com.google.guava:guava:27.0.1-jre'
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+        implementation 'org.jasypt:jasypt:1.9.2'
+    }
 }
 
 project(':configurator') {
-  
-  mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
 
-  apply plugin: 'application'
+    mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
+    apply plugin: 'com.github.hierynomus.license'
+    apply plugin: 'application'
 
-  dependencies {
-    compile project(':common')
+    dependencies {
+        compile project(':common')
 
-    //implementation 'com.google.guava:guava:27.0.1-jre'
-    testImplementation 'junit:junit:4.12'
-  }
-
-  // TODO: gradle complains if this isn't listed in both positions...
-  mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
-
-  jar {
-    manifest {
-      attributes('Implementation-Title': project.name,
-              'Implementation-Version': project.version,
-              'Main-Class': mainClassName)
+        //implementation 'com.google.guava:guava:27.0.1-jre'
+        testImplementation 'junit:junit:4.12'
     }
-  }
+
+    // TODO: gradle complains if this isn't listed in both positions...
+    mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
+
+    jar {
+        manifest {
+            attributes('Implementation-Title': project.name,
+                    'Implementation-Version': project.version,
+                    'Main-Class': mainClassName)
+        }
+    }
 }
