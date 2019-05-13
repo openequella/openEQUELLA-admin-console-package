@@ -14,3 +14,10 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
+
+# admin-console-package-licenses
+
+| Category              | License                                                    | Dependency                             | Notes                   |
+| --------------------- | -----------------------------------------------------------| ---------------------------------------| ----------------------- |
+| Apache                | [ASF 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)  | nebula.lint # 9.3.4                    | <notextile></notextile> |
+| Apache                | [ASF 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)  | com.github.hierynomus.license # 0.15.0 | <notextile></notextile> |
