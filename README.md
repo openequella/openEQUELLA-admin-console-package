@@ -14,7 +14,7 @@ For development, you can run the app via:
 ```
 
 ##Apereo Header validation
-A task has been added that will check that each source file in the common and configurator projects has an Apereo 
+The gradle build includes a task which will check that each source file in the common and configurator projects has an Apereo 
 license notice at the top of the file. This license is stored in `LICENSE/LICENSE` in the root of this repository.
 In order to apply the headers, run:
 
@@ -26,4 +26,4 @@ In order to apply the headers, run:
  ```
  -$ ./gradlew license
  ```
- 
+NOTE: The license check is executed as part of the standard `build` target.
