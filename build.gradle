@@ -9,7 +9,7 @@ plugins {
     id 'application'
     id 'base'
     id 'nebula.lint' version '9.3.4'
-    id "com.github.hierynomus.license" version "0.15.0"
+    id 'com.github.hierynomus.license' version '0.15.0'
 }
 
 
@@ -17,7 +17,7 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'base'
     apply plugin: 'nebula.lint'
-    apply plugin: "com.github.hierynomus.license"
+    apply plugin: 'com.github.hierynomus.license'
     license {
         strictCheck
         header = file('../LICENSE/LICENSE')
@@ -45,7 +45,7 @@ subprojects {
 }
 
 project(':common') {
-    apply plugin: "com.github.hierynomus.license"
+    apply plugin: 'com.github.hierynomus.license'
     dependencies {
         implementation 'com.google.guava:guava:27.0.1-jre'
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
@@ -56,7 +56,7 @@ project(':common') {
 project(':configurator') {
 
     mainClassName = 'org.apereo.openequella.adminconsole.configurator.Configurator'
-    apply plugin: "com.github.hierynomus.license"
+    apply plugin: 'com.github.hierynomus.license'
     apply plugin: 'application'
 
     dependencies {
