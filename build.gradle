@@ -84,6 +84,7 @@ ext {
 import java.security.MessageDigest
 task downloadJre  {
     def originalFileHash = "dd28d6d2cde2b931caf94ac2422a2ad082ea62f0beee3bf7057317c53093de93"
+    // Download JRE
     doFirst {
         if(!jreDir.exists()) {
             def downloadUrl = new URL("https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/OpenJDK8U-jdk_x64_linux_hotspot_8u212b03.tar.gz")
@@ -101,6 +102,7 @@ task downloadJre  {
             }
         }
     }
+    // Check the hash of JRE
     doLast {
         def digest = MessageDigest.getInstance("SHA-256");
         def buffer = new byte[1024]
@@ -115,7 +117,7 @@ task downloadJre  {
             if(!hashValue.equals(originalFileHash)){
                 throw new Exception("Please check if JRE is downloaded securely")
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace()
         } finally {
             inputStream.close()
@@ -124,7 +126,7 @@ task downloadJre  {
 }
 
 task createPackages(dependsOn:downloadJre) {
-    //Sub tasks are dynamically created
+    //Sub tasks are dynamically created by iterating systemNames
 }
 systemNames.each { sys ->
     File sysPackageDir = new File("$projectDir/packages")
