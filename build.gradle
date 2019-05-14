@@ -4,7 +4,6 @@ plugins {
     id 'base'
     id 'nebula.lint' version '9.3.4'
     id 'com.github.hierynomus.license' version '0.15.0'
-    id 'org.gradle.crypto.checksum' version '1.1.0'
 }
 
 apply plugin: 'java'
@@ -90,10 +89,17 @@ task downloadJre  {
             def downloadUrl = new URL("https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/OpenJDK8U-jdk_x64_linux_hotspot_8u212b03.tar.gz")
             def file = new FileOutputStream(jreDir)
             def out = new BufferedOutputStream(file)
-            out << downloadUrl.openStream()
-            out.close()
+            try{
+                out << downloadUrl.openStream()
+                out.close()
+            }
+            catch(IOException e){
+                e.printStackTrace()
+            }
+            finally {
+                file.close()
+            }
         }
-
     }
     doLast {
         def digest = MessageDigest.getInstance("SHA-256");
