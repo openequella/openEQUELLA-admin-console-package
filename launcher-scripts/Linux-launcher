@@ -1,0 +1,11 @@
+#!/bin/bash
+
+
+if [ ! -d "jdk8u212-b03" ] 
+then
+    tar -xzf jre.tar.gz
+fi
+currentPath=`pwd`
+echo "export JAVA_HOME=$currentPath/jdk8u212-b03/" >>~/.bashrc
+echo "export PATH=$JAVA_HOME/bin:$PATH" >>~/.bashrc
+java -jar admin-console-package-1.0.0.jar

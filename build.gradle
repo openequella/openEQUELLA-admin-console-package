@@ -4,6 +4,7 @@ plugins {
     id 'base'
     id 'nebula.lint' version '9.3.4'
     id 'com.github.hierynomus.license' version '0.15.0'
+    id 'org.gradle.crypto.checksum' version '1.1.0'
 }
 
 apply plugin: 'java'
@@ -72,6 +73,71 @@ task copyScripts(type: Copy){
 
 task dist {
   description 'Copies everything required for the distributable into a dist folder'
-
   dependsOn 'copyDistArtifacts'
 }
+
+ext {
+    systemNames = ["Linux","Windows","Mac"]
+    jreDir = new File("$buildDir/jre.tar.gz")
+    jarDir = new File("$buildDir/libs")
+}
+
+import java.security.MessageDigest
+task downloadJre  {
+    def originalFileHash = "dd28d6d2cde2b931caf94ac2422a2ad082ea62f0beee3bf7057317c53093de93"
+    doFirst {
+        if(!jreDir.exists()) {
+            def downloadUrl = new URL("https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/OpenJDK8U-jdk_x64_linux_hotspot_8u212b03.tar.gz")
+            def file = new FileOutputStream(jreDir)
+            def out = new BufferedOutputStream(file)
+            out << downloadUrl.openStream()
+            out.close()
+        }
+
+    }
+    doLast {
+        def digest = MessageDigest.getInstance("SHA-256");
+        def buffer = new byte[1024]
+        def len
+        def inputStream = new FileInputStream(jreDir)
+        try {
+            while ((len = inputStream.read(buffer, 0, 1024)) != -1) {
+                digest.update(buffer, 0, len)
+            }
+            BigInteger bigInt = new BigInteger(1, digest.digest())
+            String hashValue = bigInt.toString(16)
+            if(!hashValue.equals(originalFileHash)){
+                throw new Exception("Please check if JRE is downloaded securely")
+            }
+        } catch (Exception e) {
+            e.printStackTrace()
+        } finally {
+            inputStream.close()
+        }
+    }
+}
+
+task createPackages(dependsOn:downloadJre) {
+    //Sub tasks are dynamically created
+}
+systemNames.each { sys ->
+    File sysPackageDir = new File("$projectDir/packages")
+    File sysScriptDir = new File("$projectDir/launcher-scripts/$sys-launcher")
+    task "packageFor$sys"(type: Zip){
+        doFirst {
+            if(!sysPackageDir.exists()){
+                sysPackageDir.mkdir()
+            }
+        }
+        archiveFileName = "admin-console-package-for-"+sys+".zip"
+        destinationDirectory = sysPackageDir
+        from jarDir
+        from jreDir
+        from sysScriptDir
+        doLast {
+            println("Package for $sys is created under "+sysPackageDir.getAbsolutePath())
+        }
+    }
+    createPackages.dependsOn("packageFor$sys")
+}
+build.finalizedBy(createPackages)
