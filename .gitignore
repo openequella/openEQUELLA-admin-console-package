@@ -10,3 +10,38 @@ bin
 .project
 .settings
 .factorypath
+
+### Intellij ###
+
+.idea/artifacts/
+.idea/httpRequests/
+
+# User-specific stuff:
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+
+# Sensitive or high-churn files:
+.idea/dataSources.ids
+.idea/dataSources.xml
+.idea/dataSources.local.xml
+.idea/dataSources/
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
+
+# Gradle:
+.idea/gradle.xml
+.idea/libraries
+## And seeing gradle projects also regenerates .iml module files
+## (see here -
+https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems),
+## lets ignore them all:
+.idea/modules/
+
+# We're not using SBT, but the plugin is at play it seems:
+.idea/sbt.xml
+
+### Intellij - END ###
