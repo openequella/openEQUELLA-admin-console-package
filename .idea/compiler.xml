@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="admin-console-package.common.main" target="1.8" />
+      <module name="admin-console-package.common.test" target="1.8" />
+      <module name="admin-console-package.configurator.main" target="1.8" />
+      <module name="admin-console-package.configurator.test" target="1.8" />
+      <module name="org.apereo.openequella.adminconsole.admin-console-package.main" target="1.8" />
+      <module name="org.apereo.openequella.adminconsole.admin-console-package.test" target="1.8" />
+      <module name="org.apereo.openequella.adminconsole.common.main" target="1.8" />
+      <module name="org.apereo.openequella.adminconsole.common.test" target="1.8" />
+      <module name="org.apereo.openequella.adminconsole.configurator.main" target="1.8" />
+      <module name="org.apereo.openequella.adminconsole.configurator.test" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
