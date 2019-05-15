@@ -88,39 +88,20 @@ task downloadJre  {
     doFirst {
         if(!jreDir.exists()) {
             def downloadUrl = new URL("https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/OpenJDK8U-jdk_x64_linux_hotspot_8u212b03.tar.gz")
-            def file = new FileOutputStream(jreDir)
-            def out = new BufferedOutputStream(file)
-            try{
-                out << downloadUrl.openStream()
-                out.close()
-            }
-            catch(IOException e){
-                e.printStackTrace()
-            }
-            finally {
-                file.close()
+            jreDir.withOutputStream {outputStream ->
+                outputStream << downloadUrl.openStream()
             }
         }
     }
     // Check the hash of JRE
     doLast {
         def digest = MessageDigest.getInstance("SHA-256");
-        def buffer = new byte[1024]
-        def len
-        def inputStream = new FileInputStream(jreDir)
-        try {
-            while ((len = inputStream.read(buffer, 0, 1024)) != -1) {
-                digest.update(buffer, 0, len)
-            }
-            BigInteger bigInt = new BigInteger(1, digest.digest())
-            String hashValue = bigInt.toString(16)
+        jreDir.withInputStream{ inputStream ->
+            def hashValue = digest.digest(inputStream.getBytes()).encodeHex().toString()
+            println(hashValue)
             if(!hashValue.equals(originalFileHash)){
                 throw new Exception("Please check if JRE is downloaded securely")
             }
-        } catch (IOException e) {
-            e.printStackTrace()
-        } finally {
-            inputStream.close()
         }
     }
 }
@@ -131,17 +112,20 @@ task createPackages(dependsOn:downloadJre) {
 systemNames.each { sys ->
     File sysPackageDir = new File("$projectDir/packages")
     File sysScriptDir = new File("$projectDir/launcher-scripts/$sys-launcher")
-    task "packageFor$sys"(type: Zip){
+    task "packageFor$sys"(type: Tar){
         doFirst {
             if(!sysPackageDir.exists()){
                 sysPackageDir.mkdir()
             }
         }
-        archiveFileName = "admin-console-package-for-"+sys+".zip"
+        archiveBaseName = "admin-console-package-for-"+sys
+        extension = 'tar.gz'
+        compression = Compression.GZIP
         destinationDirectory = sysPackageDir
         from jarDir
         from jreDir
         from sysScriptDir
+
         doLast {
             println("Package for $sys is created under "+sysPackageDir.getAbsolutePath())
         }
