@@ -76,13 +76,13 @@ task dist {
 }
 
 ext {
-    osNames = ['Linux', 'Windows', 'Mac']
+    osNames =  ['Linux', 'Windows', 'Mac']
     jdkFileName = "OpenJDK8U-jdk_x64_linux_hotspot_8u212b03.tar.gz"
     jdkDownloadDir = new File("$buildDir/jdk-downloads")
     jdkExtractDir = new File("$buildDir/jdk-downloads/jdk8u212-b03")
     jdkFile = new File("${jdkDownloadDir.getAbsolutePath()}/${jdkFileName}")
     jarDir = new File("$buildDir/libs")
-
+    scriptDir = new File("$projectDir/launcher-scripts")
 }
 
 import java.security.MessageDigest
@@ -111,8 +111,9 @@ task downloadJdk  {
 }
 
 task unzipJdk(dependsOn:downloadJdk ,type: Copy) {
-            from tarTree(resources.gzip(jdkFile))
-            into jdkDownloadDir
+    description "Unzip JDK only when it is firstly downloaded"
+    from tarTree(resources.gzip(jdkFile))
+    into jdkDownloadDir
 }
 unzipJdk.onlyIf {
     !jdkExtractDir.exists()
@@ -125,35 +126,9 @@ task createPackages(dependsOn:unzipJdk) {
 
 osNames.each { sys ->
     def packageDir = new File("$buildDir/distributions/packages")
-    def scriptDir
-    def taskType
-    def fileExtension
-    def fileCompression
-    if(sys == "Windows"){
-        taskType = "org.gradle.api.tasks.bundling.Zip"
-        fileExtension = "zip"
-        fileCompression = false
-        scriptDir = new File("$projectDir/launcher-scripts/W-launcher.bat")
-    }
-    else if (sys == "Linux"){
-        taskType = "org.gradle.api.tasks.bundling.Tar"
-        fileExtension = "tar.gz"
-        fileCompression = true
-        scriptDir = new File("$projectDir/launcher-scripts/Linux-launcher.sh")
-    }
-    else {
-        taskType = "org.gradle.api.tasks.bundling.Tar"
-        fileExtension = "tar.gz"
-        fileCompression = true
-        scriptDir = new File("$projectDir/launcher-scripts/Mac-launcher.dmg")
-    }
+    def(taskType, fileExtension, fileCompression, scriptFile) = setPackageProperties(sys.toString())
     def cls = Class.forName(taskType)
     task "packageFor$sys"(type: cls){
-        doFirst {
-            if(!packageDir.exists()){
-                packageDir.mkdirs()
-            }
-        }
         mustRunAfter unzipJdk
         archiveBaseName = "admin-console-package-for-"+sys
         extension = fileExtension
@@ -161,13 +136,39 @@ osNames.each { sys ->
         destinationDirectory = packageDir
         from jarDir
         from jdkDownloadDir
-        from scriptDir
         exclude '*.tar.gz'
+        from file("${scriptDir.getAbsolutePath()}/$scriptFile")
         doLast {
             println("Package for $sys is created under "+packageDir.getAbsolutePath())
         }
     }
     createPackages.dependsOn("packageFor$sys")
+}
+
+def setPackageProperties(String sys) {
+    def scriptFile
+    def taskType
+    def fileExtension
+    def fileCompression
+    if(sys == "Windows"){
+        taskType = "org.gradle.api.tasks.bundling.Zip"
+        fileExtension = "zip"
+        fileCompression = false
+        scriptFile = "Windows-launcher.bat"
+    }
+    else if (sys == "Linux"){
+        taskType = "org.gradle.api.tasks.bundling.Tar"
+        fileExtension = "tar.gz"
+        fileCompression = true
+        scriptFile = "Linux-launcher"
+    }
+    else {
+        taskType = "org.gradle.api.tasks.bundling.Tar"
+        fileExtension = "tar.gz"
+        fileCompression = true
+        scriptFile = "Mac-launcher.dmg"
+    }
+    return new Tuple4(taskType,fileExtension,fileCompression,scriptFile)
 }
 
 build.finalizedBy(createPackages)
