@@ -76,7 +76,7 @@ task dist {
 }
 
 ext {
-    osNames =  ['Linux', 'Windows', 'Mac']
+    osNames = ['Linux', 'Windows', 'Mac']
     jdkFileName = "OpenJDK8U-jdk_x64_linux_hotspot_8u212b03.tar.gz"
     jdkDownloadDir = new File("$buildDir/jdk-downloads")
     jdkExtractDir = new File("$buildDir/jdk-downloads/jdk8u212-b03")
@@ -88,8 +88,8 @@ ext {
 import java.security.MessageDigest
 task downloadJdk  {
     description "Download OpenJDK and check its hash"
-    final originalFileHash = "dd28d6d2cde2b931caf94ac2422a2ad082ea62f0beee3bf7057317c53093de93"
     doFirst {
+        final originalFileHash = "dd28d6d2cde2b931caf94ac2422a2ad082ea62f0beee3bf7057317c53093de93"
         if(!jdkDownloadDir.exists()) {
             jdkDownloadDir.mkdirs()
         }
@@ -108,12 +108,22 @@ task downloadJdk  {
             }
         }
     }
+    doLast {
+        println "JDK is downloaded and safe to use."
+    }
 }
 
-task unzipJdk(dependsOn:downloadJdk ,type: Copy) {
-    description "Unzip JDK only when it is firstly downloaded"
-    from tarTree(resources.gzip(jdkFile))
-    into jdkDownloadDir
+task unzipJdk(dependsOn:downloadJdk) {
+    description "Unzip JDK only when the extract directory is not existing"
+    doFirst {
+        copy {
+            from tarTree(resources.gzip(jdkFile))
+            into jdkDownloadDir
+        }
+    }
+    doLast {
+        println "JDK is extracted."
+    }
 }
 unzipJdk.onlyIf {
     !jdkExtractDir.exists()
