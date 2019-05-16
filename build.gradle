@@ -6,22 +6,15 @@ plugins {
     id 'com.github.hierynomus.license' version '0.15.0'
 }
 
-group = 'org.apereo.openequella.adminconsole'
-version = artifactVersion
-mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
-
 apply plugin: 'java'
 apply plugin: 'base'
 apply plugin: 'nebula.lint'
 apply plugin: 'com.github.hierynomus.license'
 apply plugin: "application"
 
-// Gradlelint is broken: https://github.com/nebula-plugins/gradle-lint-plugin/issues/203
-gradleLint.rules = [/*'all-dependency', */'dependency-parentheses', 'duplicate-dependency-class']
-
-license {
-    strictCheck
-    header = file('../LICENSE')
+repositories {
+   mavenLocal()
+   jcenter()
 }
 
 dependencies {
@@ -31,6 +24,19 @@ dependencies {
   runtimeOnly 'org.slf4j:slf4j-simple:1.6.4'
   testImplementation "junit:junit:$junitVersion"
 }
+
+group = 'org.apereo.openequella.adminconsole'
+version = artifactVersion
+mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
+
+// Gradlelint is broken: https://github.com/nebula-plugins/gradle-lint-plugin/issues/203
+gradleLint.rules = [/*'all-dependency', */'dependency-parentheses', 'duplicate-dependency-class']
+
+license {
+    strictCheck
+    header = file('LICENSE')
+}
+
 
 jar {
   archiveFileName = 'admin.jar'

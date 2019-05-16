@@ -1,17 +1,19 @@
-/*
- * Copyright 2019 Apereo
+/**
+ *     Licensed to The Apereo Foundation under one or more contributor license
+ *     agreements. See the NOTICE file distributed with this work for additional
+ *     information regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *     The Apereo Foundation licenses this file to you under the Apache License,
+ *     Version 2.0, (the "License"); you may not use this file except in compliance
+ *     with the License. You may obtain a copy of the License at:
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *     Unless required by applicable law or agreed to in writing, software
+ *     distributed under the License is distributed on an "AS IS" BASIS,
+ *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *     See the License for the specific language governing permissions and
+ *     limitations under the License.
  */
 package org.apereo.openequella.adminconsole.launcher;
 
@@ -20,7 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -43,6 +44,7 @@ import org.apereo.openequella.adminconsole.swing.TableLayout;
 import org.apereo.openequella.adminconsole.util.BlindSSLSocketFactory;
 import org.apereo.openequella.adminconsole.util.ExecUtils.ExecResult;
 import org.apereo.openequella.adminconsole.util.Proxy;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClientLauncher extends JFrame implements ActionListener, WindowListener {
