@@ -81,6 +81,8 @@ task dist {
 final TARGZ = 'tar.gz', ZIP = 'zip', ZIPTASK = 'Zip', TARTASK = 'Tar', WINDOWS = 'windows', MAC = 'mac', LINUX = 'linux'
 final jreDownloadDir = file("$buildDir/jre-downloads")
 final jreExtractDir = "${jreDownloadDir.absolutePath}/jre"
+final packageDir = "${buildDir}/distributions/packages"
+final jarDir = "${buildDir}/libs"
 
 class PackageProperties {
     String packageFileExt
@@ -116,7 +118,8 @@ task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac, and c
         if(!jreDownloadDir.exists()) {
             jreDownloadDir.mkdirs()
         }
-        println("Start downloading OpenJRE of Linux, Windows and Mac...")
+        
+        println("Start downloading OpenJRE...")
         jrePropertiesMap.collect {String sys,JreProperties props ->
             Thread.start {
                 props.with {
@@ -135,10 +138,12 @@ task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac, and c
                             }
                             digest().encodeHex() as String
                         }
+                        
                         if(jreHash != hash) {
                             throw new RuntimeException("Hash mismatch for downloaded ${sys} JRE. File may have been modified.")
                         }
-                        println("OpenJRE for ${sys} is downloaded")
+                        
+                        println("OpenJRE for ${sys} is downloaded.")
                     }
                 }
             }
@@ -180,8 +185,6 @@ task createPackages(description: 'Create three packages for Linux, Windows and M
 
 packagePropertiesMap.each {String sys, PackageProperties props ->
     props.with {
-        String packageDir = "${buildDir}/distributions/packages"
-        String jarDir = "${buildDir}/libs"
         String scriptDir = "${projectDir}/launcher-scripts/${scriptFile}"
         String jreExtractSubDir = "${jreExtractDir}/$sys"
         Class taskCLass = Class.forName("org.gradle.api.tasks.bundling.${taskType}")
@@ -201,13 +204,12 @@ packagePropertiesMap.each {String sys, PackageProperties props ->
             exclude (["*.${ZIP}", "*.${TARGZ}"])
 
             doLast {
-                println("Package for ${sys} is created under ${packageDir}")
+                println("Package for ${sys} is created under ${packageDir}.")
             }
         }
 
         createPackages.dependsOn("packageFor$sys")
     }
 }
-
 
 build.finalizedBy(createPackages)
