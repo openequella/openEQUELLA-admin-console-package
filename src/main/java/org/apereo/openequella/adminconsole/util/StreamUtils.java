@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 public class StreamUtils {
 
@@ -45,6 +46,14 @@ public class StreamUtils {
     int len;
     while ((len = in.read(buf)) != -1) {
       out.append(new String(buf, 0, len));
+    }
+  }
+
+  public static void copyStream(final InputStreamReader in, final OutputStreamWriter out) throws IOException {
+    char[] buf = new char[4096];
+    int len;
+    while ((len = in.read(buf)) != -1) {
+      out.write(new String(buf, 0, len));
     }
   }
 }

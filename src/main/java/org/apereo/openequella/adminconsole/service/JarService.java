@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apereo.openequella.adminconsole.util.ExecUtils;
-import org.apereo.openequella.adminconsole.util.ExecUtils.ExecResult;
 import org.apereo.openequella.adminconsole.util.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +65,7 @@ public class JarService {
 	/**
 	 * @param jarName Omit the jar extension
 	 */
-	public File ensureCacheJar(String jarName){
+	public File ensureCacheJar(String jarName) {
 		downloadJar(jarName);
 		return getCacheJarFile(jarName);
 	}
@@ -74,12 +73,12 @@ public class JarService {
 	/**
 	 * @param jarName Omit the jar extension
 	 */
-	public void downloadJar(String jarName){
+	public void downloadJar(String jarName) {
 		try {
 			//check cache entry
 			final File metadataFile = getCacheMetadataFile(jarName);
 			final File jarFile = getCacheJarFile(jarName);
-			
+
 			// hit the server to download
 			//final URL url = new URL(baseUrl + "/console.do?jar=" + URLEncoder.encode(jarName + ".jar", "utf-8"));
 			final String strUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + "adminconsole.jar";
@@ -90,7 +89,7 @@ public class JarService {
 				conn.setConnectTimeout(10000);
 				conn.setReadTimeout(10000);
 				conn.setRequestMethod("GET");
-				if (metadataFile.exists()){
+				if (metadataFile.exists()) {
 					final JarMetadata meta = JsonService.readFile(metadataFile, JarService.JarMetadata.class);
 					conn.setRequestProperty("If-None-Match", meta.getEtag());
 					conn.setRequestProperty("If-Modified-Since", meta.getModifiedDate());
@@ -98,7 +97,7 @@ public class JarService {
 				conn.connect();
 				final int responseCode = conn.getResponseCode();
 				// we're ok with our version, but check that it exists first
-				if (responseCode == 304 && jarFile.exists()){
+				if (responseCode == 304 && jarFile.exists()) {
 					return;
 				}
 
@@ -112,24 +111,22 @@ public class JarService {
 
 				// download and store in our cache
 				try (InputStream is = (InputStream) conn.getInputStream();
-					BufferedInputStream bis = new BufferedInputStream(is);
-					FileOutputStream fos = new FileOutputStream(jarFile)){
+						BufferedInputStream bis = new BufferedInputStream(is);
+						FileOutputStream fos = new FileOutputStream(jarFile)) {
 					StreamUtils.copyStream(bis, fos);
 				}
-			}
-			finally {
+			} finally {
 				if (conn != null) {
 					conn.disconnect();
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Failed to download jar " + jarName, e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	public ExecResult executeJar(String jarName, String mainClass, String... jvmArgs){
+	public int executeJar(String jarName, String mainClass, String... jvmArgs) {
 		ensureBinJars(jarName);
 		final File binJar = getBinJarFile(jarName);
 		final List<String> command = new ArrayList<>();
@@ -138,29 +135,28 @@ public class JarService {
 		command.add(jarName + ".jar");
 		command.addAll(Arrays.asList(jvmArgs));
 		command.add(mainClass);
-		
-		final ExecResult result = ExecUtils.exec(command.toArray(new String[]{}), null, binJar.getParentFile());
-		return result;
+
+		return ExecUtils.exec(command.toArray(new String[] {}), null, binJar.getParentFile());
 	}
 
 	/**
 	 * @param jarName Omit the jar extension
 	 */
-	private File getCacheMetadataFile(String jarName){
+	private File getCacheMetadataFile(String jarName) {
 		return StorageService.getFile(cacheFolder, jarName + "-manifest.json");
 	}
 
 	/**
 	 * @param jarName Omit the jar extension
 	 */
-	private File getCacheJarFile(String jarName){
+	private File getCacheJarFile(String jarName) {
 		return StorageService.getFile(cacheFolder, jarName + ".jar");
 	}
 
 	/**
 	 * @param jarName Omit the jar extension
 	 */
-	private File getBinJarFile(String jarName){
+	private File getBinJarFile(String jarName) {
 		return StorageService.getFile(binFolder, jarName + ".jar");
 	}
 
@@ -168,42 +164,42 @@ public class JarService {
 		private String etag;
 		private String modifiedDate;
 		private String expiryDate;
-	
+
 		/**
 		 * @return the etag
 		 */
 		public String getEtag() {
 			return etag;
 		}
-	
+
 		/**
 		 * @return the expiryDate
 		 */
 		public String getExpiryDate() {
 			return expiryDate;
 		}
-	
+
 		/**
 		 * @param expiryDate the expiryDate to set
 		 */
 		public void setExpiryDate(String expiryDate) {
 			this.expiryDate = expiryDate;
 		}
-	
+
 		/**
 		 * @return the modifiedDate
 		 */
 		public String getModifiedDate() {
 			return modifiedDate;
 		}
-	
+
 		/**
 		 * @param modifiedDate the modifiedDate to set
 		 */
 		public void setModifiedDate(String modifiedDate) {
 			this.modifiedDate = modifiedDate;
 		}
-	
+
 		/**
 		 * @param etag the etag to set
 		 */

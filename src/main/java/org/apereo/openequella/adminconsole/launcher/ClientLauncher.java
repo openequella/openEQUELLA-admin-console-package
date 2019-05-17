@@ -42,7 +42,6 @@ import org.apereo.openequella.adminconsole.swing.ComponentHelper;
 import org.apereo.openequella.adminconsole.swing.ServerPicker;
 import org.apereo.openequella.adminconsole.swing.TableLayout;
 import org.apereo.openequella.adminconsole.util.BlindSSLSocketFactory;
-import org.apereo.openequella.adminconsole.util.ExecUtils.ExecResult;
 import org.apereo.openequella.adminconsole.util.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,22 +107,21 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
       final int[] rows = { generalActions.getPreferredSize().height, 0, serverList.getPreferredSize().height, 0,
           serverActions.getPreferredSize().height };
       final TableLayout layout = new TableLayout(rows, new int[] { WINDOW_WIDTH });
-      final JPanel all = new JPanel(layout);
-      all.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-      all.add(generalActions, new Rectangle(0, 0, 1, 1));
-      all.add(serverList, new Rectangle(0, 2, 1, 1));
-      all.add(serverActions, new Rectangle(0, 4, 1, 1));
+      final JPanel launcherPanel = new JPanel(layout);
+      launcherPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+      launcherPanel.add(generalActions, new Rectangle(0, 0, 1, 1));
+      launcherPanel.add(serverList, new Rectangle(0, 2, 1, 1));
+      launcherPanel.add(serverActions, new Rectangle(0, 4, 1, 1));
 
       updateButtons();
 
-      getContentPane().add(all);
+      getContentPane().add(launcherPanel);
       getRootPane().setDefaultButton(launchButton);
       addWindowListener(this);
       pack();
 
       ComponentHelper.centreOnScreen(this);
       setVisible(true);
-
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -214,15 +212,8 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
           ClientLauncher.this.setVisible(false);
 
           final JarService jarService = new JarService(url);
-          final ExecResult result = jarService.executeJar("adminconsole", "com.tle.admin.boot.Bootstrap",
+          jarService.executeJar("adminconsole", "com.tle.admin.boot.Bootstrap",
               "-Djnlp.ENDPOINT=" + url, "-Dplugin.cache.dir=" + StorageService.getFolder("cache"));
-
-          // FIXME: we want real-time access to out and err streams
-          LOGGER.info("stdout:" + result.getStdout());
-          final String stderr = result.getStderr();
-          if (stderr != null && stderr.length() > 0) {
-            LOGGER.error("stderr:" + stderr);
-          }
 
           ClientLauncher.this.dispose();
           System.exit(0);
@@ -343,7 +334,6 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
   protected boolean handleMakeDefault(int index) {
     if (index > -1) {
-      final ServerProfile profile = (ServerProfile) serverPicker.getSelectedItem();
       final int result = JOptionPane.showConfirmDialog(this, PROMPT_MAKE_DEFAULT, MAKE_DEFAULT_TITLE,
           JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
