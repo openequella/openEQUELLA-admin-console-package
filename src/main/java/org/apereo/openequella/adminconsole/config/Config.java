@@ -64,7 +64,17 @@ public class Config {
 	public void writeServerConfigFile(){
         final File serversFile = getServerConfigFile();
         JsonService.writeFile(serversFile, this);
-    }
+	}
+	
+	public static boolean deleteServerConfigFile(){
+		final File serversFile = getServerConfigFile();
+		if (serversFile.exists()){
+			if (!serversFile.delete()) {
+				throw new RuntimeException("Failed to delete config file " + serversFile.getAbsolutePath());
+			}
+		}
+		return false;
+	}
 
     private static File getServerConfigFile(){
         return StorageService.getFile("config.json");
