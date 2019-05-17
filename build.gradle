@@ -4,6 +4,7 @@ plugins {
     id 'base'
     id 'nebula.lint' version '9.3.4'
     id 'com.github.hierynomus.license' version '0.15.0'
+    id 'distribution'
 }
 
 apply plugin: 'java'
@@ -75,68 +76,96 @@ task dist {
   dependsOn 'copyDistArtifacts'
 }
 
-ext {
-    osNames = ['linux', 'windows', 'mac']
-    jreFileNameTemplate = {sys,extension -> "OpenJDK8U-jre_x64_${sys}_hotspot_8u212b03.${extension}" }
-    jreDownloadDir = file("$buildDir/jre-downloads")
-    jreExtractDir = "${jreDownloadDir.absolutePath}/jre"
-    jreExtractSubDir = {sys -> "${jreExtractDir}/$sys"}
-    jreHashes = ['74daf0b77a7fd679cbb3a6228e0efa8c4a90b7664aa057f211e34bbfb38640fb',
-                 'c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89',
-                 '80855320c42a3b06617c6e466c64df67731542a805972185b075ca6cb1222c7f']
-    packageFileExtension = ['zip', 'tar.gz']
+
+
+final TARGZ = 'tar.gz', ZIP = 'zip', ZIPTASK = 'Zip', TARTASK = 'Tar', WINDOWS = 'windows', MAC = 'mac', LINUX = 'linux'
+final jreDownloadDir = file("$buildDir/jre-downloads")
+final jreExtractDir = "${jreDownloadDir.absolutePath}/jre"
+
+class PackageProperties {
+    String packageFileExt
+    String scriptFile
+    String taskType
+    boolean fileCompression
+
 }
+
+class JreProperties {
+    String jreHash
+    String jreFileExt
+    String jreFileName
+    String jreDownloadUrl
+}
+
+def packagePropertiesMap = [
+        windows: new PackageProperties(packageFileExt: ZIP, scriptFile: 'Windows-launcher.bat', taskType: ZIPTASK, fileCompression: false),
+        linux: new PackageProperties(packageFileExt: TARGZ, scriptFile: 'Linux-launcher.sh', taskType: TARTASK, fileCompression: true),
+        mac: new PackageProperties(packageFileExt: TARGZ, scriptFile: 'Mac-launcher.sh', taskType: TARTASK, fileCompression: true)
+]
+
+def jrePropertiesMap = [
+        windows: new JreProperties(jreFileExt: ZIP, jreHash: 'c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89'),
+        linux: new JreProperties(jreFileExt: TARGZ, jreHash: '74daf0b77a7fd679cbb3a6228e0efa8c4a90b7664aa057f211e34bbfb38640fb'),
+        mac: new JreProperties(jreFileExt: TARGZ, jreHash: '80855320c42a3b06617c6e466c64df67731542a805972185b075ca6cb1222c7f')
+]
 
 import java.security.MessageDigest
 
 task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac, and check their hashes') {
-
     doFirst {
         if(!jreDownloadDir.exists()) {
             jreDownloadDir.mkdirs()
         }
-        osNames.each {String sys ->
-            def index = osNames.indexOf(sys)
-            def jreFileExtension = (sys == 'windows' ? packageFileExtension[0] : packageFileExtension[1])
-            def jreFileName = jreFileNameTemplate(sys,jreFileExtension)
-            def jreFile = file("$jreDownloadDir.absolutePath/$jreFileName")
-            if(!jreFile.exists()){
-                new URL("https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/$jreFileName")
-                        .withInputStream {
-                    jreFile.newOutputStream() << it
-                }
-                final hash = MessageDigest.getInstance('SHA-256').with {
-                    jreFile.eachByte(1024) {buff,len ->
-                        update(buff, 0, len)
+        println("Start downloading OpenJRE of Linux, Windows and Mac...")
+        jrePropertiesMap.collect {String sys,JreProperties props ->
+            Thread.start {
+                props.with {
+                    jreFileName = "OpenJDK8U-jre_x64_${sys}_hotspot_8u212b03.${jreFileExt}"
+                    jreDownloadUrl = "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/$jreFileName"
+                    File jreFile = file("$jreDownloadDir.absolutePath/$jreFileName")
+
+                    if(!jreFile.exists()){
+                        new URL(jreDownloadUrl).withInputStream {
+                            jreFile.newOutputStream() << it
+                        }
+
+                        final hash = MessageDigest.getInstance('SHA-256').with {
+                            jreFile.eachByte(1024) {buff,len ->
+                                update(buff, 0, len)
+                            }
+                            digest().encodeHex() as String
+                        }
+                        if(jreHash != hash) {
+                            throw new RuntimeException("Hash mismatch for downloaded ${sys} JRE. File may have been modified.")
+                        }
+                        println("OpenJRE for ${sys} is downloaded")
                     }
-                    digest().encodeHex() as String
-                }
-                if(hash != jreHashes[index]) {
-                    throw new RuntimeException("Hash mismatch for downloaded $sys JRE. File may have been modified.")
                 }
             }
+        }.each {
+            thread -> thread.join()
         }
-        
     }
 }
 
 task unzipJre(description: 'Unzip JREs only when the extract directory is not existing', dependsOn:downloadJre) {
     doFirst {
         fileTree(jreDownloadDir).matching {
+            // Excluding the jre folder
             exclude 'jre'
-        }.each { jreFile ->
-                 if(jreFile.name.endsWith('zip')) {
-                     copy {
-                         from zipTree(jreFile)
-                         into jreExtractSubDir('windows')
-                     }
+        }.each {jreFile ->
+             if(jreFile.name.endsWith(ZIP)) {
+                 copy {
+                     from zipTree(jreFile)
+                     into "$jreExtractDir/${WINDOWS}"
                  }
-                 else {
-                     copy {
-                         from tarTree(resources.gzip(jreFile))
-                         into jreExtractSubDir(jreFile.name.contains('mac') ? 'mac' : 'linux')
-                     }
+             }
+             else {
+                 copy {
+                     from tarTree(resources.gzip(jreFile))
+                     into "$jreExtractDir/${jreFile.name.contains(MAC) ? MAC : LINUX}"
                  }
+             }
         }
     }
 }
@@ -149,57 +178,36 @@ task createPackages(description: 'Create three packages for Linux, Windows and M
     //This task also depends on other three tasks which are created by iterating osNames
 }
 
-osNames.each {String sys ->
-    def packageDir = new File("$buildDir/distributions/packages")
-    def (taskType, fileExtension, fileCompression, scriptFile) = setPackageProperties(sys)
-    def taskCLass = Class.forName(taskType)
-    def jarDir = file("$buildDir/libs")
-    def scriptDir = file("$projectDir/launcher-scripts")
-    task "packageFor$sys"(type: taskCLass){
-        mustRunAfter unzipJre
-        archiveBaseName = "admin-console-package-for-$sys"
-        extension = fileExtension
-        if(fileCompression) compression = Compression.GZIP
-        destinationDirectory = packageDir
-        from jarDir
-        from file(jreExtractSubDir(sys))
-        exclude (['*.zip', '*.tar.gz'])
-        from file("${scriptDir.getAbsolutePath()}/$scriptFile")
+packagePropertiesMap.each {String sys, PackageProperties props ->
+    props.with {
+        String packageDir = "${buildDir}/distributions/packages"
+        String jarDir = "${buildDir}/libs"
+        String scriptDir = "${projectDir}/launcher-scripts/${scriptFile}"
+        String jreExtractSubDir = "${jreExtractDir}/$sys"
+        Class taskCLass = Class.forName("org.gradle.api.tasks.bundling.${taskType}")
 
-        doLast {
-            println("Package for $sys is created under ${packageDir.absolutePath}")
+        task "packageFor$sys"(type: taskCLass, description: "Create ${sys} package") {
+            mustRunAfter unzipJre
+            archiveBaseName = "admin-console-package-for-${sys}"
+            extension = packageFileExt
+            if(fileCompression) {
+                compression = Compression.GZIP
+            }
+            destinationDirectory = file(packageDir)
+
+            from file(jarDir)
+            from file(jreExtractSubDir)
+            from file(scriptDir)
+            exclude (["*.${ZIP}", "*.${TARGZ}"])
+
+            doLast {
+                println("Package for ${sys} is created under ${packageDir}")
+            }
         }
+
+        createPackages.dependsOn("packageFor$sys")
     }
-    createPackages.dependsOn("packageFor$sys")
 }
 
-def setPackageProperties(String sys) {
-    def scriptFile
-    def taskType
-    def fileExtension
-    def fileCompression
-    def gradleBundlingTaskPackage = { type -> "org.gradle.api.tasks.bundling.$type" }
-    def scriptFileNames = ['Windows-launcher.bat', 'Linux-launcher.sh', 'Mac-launcher.dmg']
-
-    if(sys == osNames[1]){
-        taskType = gradleBundlingTaskPackage('Zip')
-        fileExtension = packageFileExtension[0]
-        fileCompression = false
-        scriptFile = scriptFileNames[0]
-    }
-    else if (sys == osNames[0]){
-        taskType = gradleBundlingTaskPackage('Tar')
-        fileExtension = packageFileExtension[1]
-        fileCompression = true
-        scriptFile = scriptFileNames[1]
-    }
-    else {
-        taskType = gradleBundlingTaskPackage('Tar')
-        fileExtension = packageFileExtension[1]
-        fileCompression = true
-        scriptFile = scriptFileNames[2]
-    }
-    return new Tuple4(taskType,fileExtension,fileCompression,scriptFile)
-}
 
 build.finalizedBy(createPackages)

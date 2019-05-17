@@ -30,11 +30,20 @@ NOTE: The license check is executed as part of the standard `build` target.
 
 ## Creating packages for Linux, Windows and Mac
 The gradle build includes a task which creates three packages by bundling OpenJDK, a fat JAR of this project and a system-specific launcher script.
-For Linux user, extract the package and run : ./Linux-launcher.sh
-For Windows user, extract the package and double click Windows-launcher.bat
-For Mac user, extract the package and (to be continued...)
 
-These packages will be produced as part of the standard ./gradlew build. However, if you would like to create the packages directly you can use the createPackages task:
+* For Linux user, extract the package and run : ./Linux-launcher.sh
+
+* For Windows user, extract the package and double click Windows-launcher.bat
+
+* For Mac user, extract the package and (to be continued...)
+
+These packages will be produced as part of the standard build task.
+ 
+ ```
+  -$ ./gradlew build
+ ```
+ 
+However, if you would like to create the packages directly you can use the createPackages task:
 
  ```
   -$ ./gradlew createPackages
