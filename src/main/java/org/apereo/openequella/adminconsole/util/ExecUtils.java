@@ -27,14 +27,12 @@ import org.slf4j.LoggerFactory;
 public final class ExecUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(ExecUtils.class);
 
-  public static int exec(String[] cmdarray, 
-      Map<String, String> additionalEnv, 
-      File dir) {
+  public static int exec(String[] cmdarray, Map<String, String> additionalEnv, File dir) {
     try {
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Exec " + Arrays.asList(cmdarray));
       }
-  
+
       final ProcessBuilder pbuilder = new ProcessBuilder(cmdarray).inheritIO();
       if (additionalEnv != null) {
         pbuilder.environment().putAll(additionalEnv);
