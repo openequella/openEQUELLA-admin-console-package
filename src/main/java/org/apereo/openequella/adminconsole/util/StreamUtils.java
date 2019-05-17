@@ -26,18 +26,10 @@ import java.io.OutputStreamWriter;
 public class StreamUtils {
 
   public static void copyStream(final InputStream in, final OutputStream out) throws IOException {
-    copyStream(in, out, 4096, null);
-  }
-
-  public static void copyStream(final InputStream in, final OutputStream out, final int bufferSize,
-      final ProgressListener listener) throws IOException {
-    byte[] buf = new byte[bufferSize];
+    byte[] buf = new byte[4096];
     int len;
     while ((len = in.read(buf)) != -1) {
       out.write(buf, 0, len);
-      if (listener != null) {
-        listener.add(len);
-      }
     }
   }
 
