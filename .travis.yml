@@ -15,7 +15,7 @@ install: true
 script:
   - ./gradlew build
 after_success:
-  - aws s3 --region us-east-1 cp --recursive build/distributions/packages s3://oeq-admin-console-package/`printf %04d $TRAVIS_BUILD_NUMBER`/
+  - aws s3 --region us-east-1 cp --recursive build/distributions s3://oeq-admin-console-package/`printf %04d $TRAVIS_BUILD_NUMBER`/
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

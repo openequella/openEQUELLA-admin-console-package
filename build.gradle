@@ -104,7 +104,7 @@ final def packageProperties = [
 ]
 
 final def jreProperties = [
-        windows: new JreProperties(hash: '1c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89',
+        windows: new JreProperties(hash: 'c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89',
                 fileName: 'OpenJDK8U-jre_x64_windows_hotspot_8u212b03.zip'),
         linux: new JreProperties(hash: '74daf0b77a7fd679cbb3a6228e0efa8c4a90b7664aa057f211e34bbfb38640fb',
                 fileName: 'OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz'),
@@ -157,24 +157,23 @@ static boolean checkHash(JreProperties props) {
     hash == props.hash
 }
 
-task unzipJre(description: 'Unzip a JRE when the extract directory is missing', dependsOn:downloadJre) {
+task unzipJre(description: 'Unzip a JRE when the extract directory is missing', dependsOn: downloadJre) {
     doFirst {
 
-        jreProperties.each {sys,props ->
+        jreProperties.each {sys, props ->
             // If any one of three JRE folders is missing then only unzip the corresponding JRE
-            if(!new File("${jreDownloadDir.absolutePath}/jre/${sys}").exists()) {
-                    if(props.jre.name.endsWith(ZIP)) {
-                        copy {
-                            from zipTree(props.jre)
-                            into "$jreExtractDir/${WINDOWS}"
-                        }
+            if (!new File("${jreDownloadDir.absolutePath}/jre/${sys}").exists()) {
+                if (props.jre.name.endsWith(ZIP)) {
+                    copy {
+                        from zipTree(props.jre)
+                        into "$jreExtractDir/${WINDOWS}"
                     }
-                    else {
-                        copy {
-                            from tarTree(resources.gzip(props.jre))
-                            into "$jreExtractDir/${props.jre.name.contains(MAC) ? MAC : LINUX}"
-                        }
+                } else {
+                    copy {
+                        from tarTree(resources.gzip(props.jre))
+                        into "$jreExtractDir/${props.jre.name.contains(MAC) ? MAC : LINUX}"
                     }
+                }
             }
         }
     }
