@@ -32,9 +32,7 @@ NOTE: The license check is executed as part of the standard `build` target.
 The gradle build includes a task which creates three packages by bundling OpenJDK, a fat JAR of this project and a system-specific launcher script.
 
 * For Linux user, extract the package and run : ./Linux-launcher.sh
-
 * For Windows user, extract the package and double click Windows-launcher.bat
-
 * For Mac user, extract the package and (to be continued...)
 
 These packages will be produced as part of the standard build task.
