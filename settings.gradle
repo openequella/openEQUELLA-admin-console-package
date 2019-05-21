@@ -1,2 +1,2 @@
-rootProject.name = 'admin-console-package'
-include 'configurator', 'common'
+rootProject.name = 'admin-console-launcher'
+include 'launcher'
