@@ -75,20 +75,14 @@ task dist {
   dependsOn 'copyDistArtifacts'
 }
 
-
-
-final TARGZ = 'tar.gz', ZIP = 'zip', ZIPTASK = 'Zip', TARTASK = 'Tar', WINDOWS = 'windows', MAC = 'mac', LINUX = 'linux'
 final jreDownloadDir = file("$buildDir/jre-downloads")
-final jreExtractDir = "${jreDownloadDir.absolutePath}/jre"
+final jreExtractDir = {sys -> "${jreDownloadDir.absolutePath}/jre/${sys}"}
 final jarDir = "${buildDir}/libs"
-
-class PackageProperties {
-    String packageFileExt
-    String scriptFile
-    String taskType
-    boolean fileCompression
-
-}
+final launcherScripts = [
+        windows: 'Windows-launcher.bat',
+        linux: 'Linux-launcher.sh',
+        mac: 'Mac-launcher.sh'
+]
 
 class JreProperties {
     String hash
@@ -96,12 +90,6 @@ class JreProperties {
     String getDownloadUrl() {"https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/${fileName}"}
     File getJre() {new File("build/jre-downloads/${fileName}")}
 }
-
-final def packageProperties = [
-        windows: new PackageProperties(packageFileExt: ZIP, scriptFile: 'Windows-launcher.bat', taskType: ZIPTASK, fileCompression: false),
-        linux: new PackageProperties(packageFileExt: TARGZ, scriptFile: 'Linux-launcher.sh', taskType: TARTASK, fileCompression: true),
-        mac: new PackageProperties(packageFileExt: TARGZ, scriptFile: 'Mac-launcher.sh', taskType: TARTASK, fileCompression: true)
-]
 
 final def jreProperties = [
         windows: new JreProperties(hash: 'c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89',
@@ -111,8 +99,6 @@ final def jreProperties = [
         mac: new JreProperties(hash: '80855320c42a3b06617c6e466c64df67731542a805972185b075ca6cb1222c7f',
                 fileName: 'OpenJDK8U-jre_x64_mac_hotspot_8u212b03.tar.gz')
 ]
-
-import java.security.MessageDigest
 
 task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac, and check their hashes') {
     doFirst {
@@ -128,12 +114,6 @@ task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac, and c
                 new URL(props.downloadUrl as String).withInputStream {
                     props.jre.newOutputStream() << it
                 }
-                if (checkHash(props)) {
-                    println("OpenJRE for ${sys} is downloaded.")
-                } else {
-                    println("Hash mismatch for downloaded ${sys} JRE. File may have been modified.")
-                    System.exit(1)
-                }
             }
         }*.join()
     }
@@ -146,63 +126,83 @@ downloadJre.onlyIf {
     }
 }
 
-static boolean checkHash(JreProperties props) {
-    final hash = MessageDigest.getInstance('SHA-256').with {
-        props.jre.eachByte(1024) {buff,len ->
+import java.security.MessageDigest
+static String calculateHash(File jre) {
+    MessageDigest.getInstance('SHA-256').with {
+        jre.eachByte(1024) {buff,len ->
             update(buff, 0, len)
         }
         digest().encodeHex() as String
     }
-
-    hash == props.hash
 }
 
-task unzipJre(description: 'Unzip a JRE when the extract directory is missing', dependsOn: downloadJre) {
+task checkJre(dependsOn: downloadJre, description: 'Check if the hash of each JRE is correct') {
     doFirst {
+        if (jreProperties.any { String sys, JreProperties props ->
+            props.hash != calculateHash(props.jre)
+        }) {
+            throw new GradleException("Hash mismatch for downloaded JRE. Files may have been modified.")
+        }
+    }
+}
 
-        jreProperties.each {sys, props ->
-            // If any one of three JRE folders is missing then only unzip the corresponding JRE
-            if (!new File("${jreDownloadDir.absolutePath}/jre/${sys}").exists()) {
-                if (props.jre.name.endsWith(ZIP)) {
-                    copy {
-                        from zipTree(props.jre)
-                        into "$jreExtractDir/${WINDOWS}"
-                    }
-                } else {
-                    copy {
-                        from tarTree(resources.gzip(props.jre))
-                        into "$jreExtractDir/${props.jre.name.contains(MAC) ? MAC : LINUX}"
-                    }
+// Execute checkJre only when downloadJre was not skipped
+checkJre.onlyIf {
+    downloadJre.didWork
+}
+
+task unzipJre(description: 'Unzip a JRE when the extract directory is missing', dependsOn: checkJre) {
+    doFirst {
+        // Find out unzipped JREs and extract them
+        jreProperties.findAll {String sys, JreProperties props ->
+            !new File(jreExtractDir(sys)).exists()
+        }.each {String sys, JreProperties props ->
+            println "Unzip JRE for ${sys}"
+            if (props.jre.name.endsWith('zip')) {
+                copy {
+                    from zipTree(props.jre)
+                    into file(jreExtractDir(sys))
+                }
+            } else {
+                copy {
+                    from tarTree(resources.gzip(props.jre))
+                    into file(jreExtractDir(sys))
                 }
             }
         }
     }
 }
 
+// Execute unzipJre only when any one of three JRE extract folders is missing
+unzipJre.onlyIf {
+    jreProperties.any {String sys, JreProperties props->
+        !new File(jreExtractDir(sys)).exists()
+    }
+}
+
 build.dependsOn(unzipJre)
 
 distributions {
-    packageProperties.each { String sys, PackageProperties props ->
-        String scriptDir = "${projectDir}/launcher-scripts/${props.scriptFile}"
-        String jreExtractSubDir = "${jreExtractDir}/$sys"
+    launcherScripts.each { String sys, String scriptFileName ->
+        String scriptFileDir = "${projectDir}/launcher-scripts/${scriptFileName}"
 
         "${sys}Packages" {
             baseName = "admin-console-package-for-${sys}"
             contents {
                 from {file(jarDir)}
-                from {file(jreExtractSubDir)}
-                from {file(scriptDir)}
+                from {file(jreExtractDir(sys))}
+                from {file(scriptFileDir)}
             }
         }
     }
 }
 
-// We want tar files are compressed by GZIP and their extension name is 'tar.gz'
+// We want TAR files to be compressed by GZIP with the file extension of '.tar.gz'
 tasks.withType(Tar){
     compression = Compression.GZIP
     archiveExtension = 'tar.gz'
 }
-// We do not need the default distributions that have not JRE bundled
+// We do not need the default distributions that have no JRE bundled
 distTar.enabled = false
 distZip.enabled = false
 // We do not need tar for Windows and zip for both Mac and Linux.
