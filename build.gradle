@@ -6,6 +6,7 @@ plugins {
     id 'com.github.hierynomus.license' version '0.15.0'
 }
 
+
 apply plugin: 'java'
 apply plugin: 'base'
 apply plugin: 'nebula.lint'
@@ -79,9 +80,9 @@ final jreDownloadDir = file("$buildDir/jre-downloads")
 final jreExtractDir = {sys -> "${jreDownloadDir.absolutePath}/jre/${sys}"}
 final jarDir = "${buildDir}/libs"
 final launcherScripts = [
-        windows: 'Windows-launcher.bat',
-        linux: 'Linux-launcher.sh',
-        mac: 'Mac-launcher.sh'
+    windows: 'Windows-launcher.bat',
+    linux: 'Linux-launcher.sh',
+    mac: 'Mac-launcher.sh'
 ]
 
 class JreProperties {
@@ -90,14 +91,16 @@ class JreProperties {
     String getDownloadUrl() {"https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/${fileName}"}
     File getJre() {new File("build/jre-downloads/${fileName}")}
 }
-
-final def jreProperties = [
-        windows: new JreProperties(hash: 'c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89',
-                fileName: 'OpenJDK8U-jre_x64_windows_hotspot_8u212b03.zip'),
-        linux: new JreProperties(hash: '74daf0b77a7fd679cbb3a6228e0efa8c4a90b7664aa057f211e34bbfb38640fb',
-                fileName: 'OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz'),
-        mac: new JreProperties(hash: '80855320c42a3b06617c6e466c64df67731542a805972185b075ca6cb1222c7f',
-                fileName: 'OpenJDK8U-jre_x64_mac_hotspot_8u212b03.tar.gz')
+final jreProperties = [
+    windows: new JreProperties(
+        hash: 'c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89',
+        fileName: 'OpenJDK8U-jre_x64_windows_hotspot_8u212b03.zip'),
+    linux: new JreProperties(
+        hash: '74daf0b77a7fd679cbb3a6228e0efa8c4a90b7664aa057f211e34bbfb38640fb',
+        fileName: 'OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz'),
+    mac: new JreProperties(
+        hash: '80855320c42a3b06617c6e466c64df67731542a805972185b075ca6cb1222c7f',
+        fileName: 'OpenJDK8U-jre_x64_mac_hotspot_8u212b03.tar.gz')
 ]
 
 task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac, and check their hashes') {
@@ -145,7 +148,6 @@ task checkJre(dependsOn: downloadJre, description: 'Check if the hash of each JR
         }
     }
 }
-
 // Execute checkJre only when downloadJre was not skipped
 checkJre.onlyIf {
     downloadJre.didWork
@@ -172,7 +174,6 @@ task unzipJre(description: 'Unzip a JRE when the extract directory is missing', 
         }
     }
 }
-
 // Execute unzipJre only when any one of three JRE extract folders is missing
 unzipJre.onlyIf {
     jreProperties.any {String sys, JreProperties props->
