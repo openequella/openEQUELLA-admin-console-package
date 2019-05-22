@@ -1,1 +1,0 @@
-java -cp .\lib\admin.jar;.\lib\slf4j-api-1.7.26.jar;.\lib\slf4j-simple-1.6.4.jar;.\lib\jackson-annotations-2.9.0.jar;.\lib\jackson-core-2.9.8.jar;.\lib\jackson-databind-2.9.8.jar;.\lib\jasypt-1.9.2.jar org.apereo.openequella.adminconsole.launcher.ClientLauncher
