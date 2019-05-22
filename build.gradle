@@ -6,7 +6,6 @@ plugins {
     id 'com.github.hierynomus.license' version '0.15.0'
 }
 
-
 apply plugin: 'java'
 apply plugin: 'base'
 apply plugin: 'nebula.lint'
@@ -14,16 +13,16 @@ apply plugin: 'com.github.hierynomus.license'
 apply plugin: "application"
 
 repositories {
-   mavenLocal()
-   jcenter()
+    mavenLocal()
+    jcenter()
 }
 
 dependencies {
-  implementation 'org.slf4j:slf4j-api:1.7.26'
-  implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8' 
-  implementation 'org.jasypt:jasypt:1.9.2'
-  runtimeOnly 'org.slf4j:slf4j-simple:1.6.4'
-  testImplementation "junit:junit:$junitVersion"
+    implementation 'org.slf4j:slf4j-api:1.7.26'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    implementation 'org.jasypt:jasypt:1.9.2'
+    runtimeOnly 'org.slf4j:slf4j-simple:1.6.4'
+    testImplementation "junit:junit:$junitVersion"
 }
 
 group = 'org.apereo.openequella.adminconsole'
@@ -38,42 +37,14 @@ license {
     header = file('LICENSE')
 }
 
-
 jar {
-  archiveFileName = 'admin.jar'
-  manifest {
-      attributes('Implementation-Title': project.name,
-              'Implementation-Version': project.version,
-              'Main-Class': mainClassName)
-  }
-}
-
-task cleanDist() {
-  dependsOn 'clean'
-  doLast {
-    delete 'dist'
-  }
-}
-
-task copyDistArtifacts(type: Copy) {
-  dependsOn 'copyScripts'
-
-  from(file('build/libs/admin.jar'))
-  from configurations.default
-  into('dist/lib')
-}
-
-task copyScripts(type: Copy){
-  dependsOn 'cleanDist', 'jar'
-
-  from(file('scripts'))
-  into('dist')
-  include('**/*')
-}
-
-task dist {
-  description 'Copies everything required for the distributable into a dist folder'
-  dependsOn 'copyDistArtifacts'
+    archiveFileName = 'admin.jar'
+    manifest {
+        attributes('Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Main-Class': mainClassName,
+                "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(' '))
+    }
 }
 
 final jreDownloadDir = file("$buildDir/jre-downloads")
@@ -91,24 +62,29 @@ class JreProperties {
     String getDownloadUrl() {"https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/${fileName}"}
     File getJre() {new File("build/jre-downloads/${fileName}")}
 }
+
 final jreProperties = [
     windows: new JreProperties(
-        hash: 'c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89',
-        fileName: 'OpenJDK8U-jre_x64_windows_hotspot_8u212b03.zip'),
+            hash: 'c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89',
+            fileName: 'OpenJDK8U-jre_x64_windows_hotspot_8u212b03.zip'),
     linux: new JreProperties(
-        hash: '74daf0b77a7fd679cbb3a6228e0efa8c4a90b7664aa057f211e34bbfb38640fb',
-        fileName: 'OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz'),
+            hash: '74daf0b77a7fd679cbb3a6228e0efa8c4a90b7664aa057f211e34bbfb38640fb',
+            fileName: 'OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz'),
     mac: new JreProperties(
-        hash: '80855320c42a3b06617c6e466c64df67731542a805972185b075ca6cb1222c7f',
-        fileName: 'OpenJDK8U-jre_x64_mac_hotspot_8u212b03.tar.gz')
+            hash: '80855320c42a3b06617c6e466c64df67731542a805972185b075ca6cb1222c7f',
+            fileName: 'OpenJDK8U-jre_x64_mac_hotspot_8u212b03.tar.gz')
 ]
 
-task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac, and check their hashes') {
+task copyDependencies(type: Copy, description: 'Copy dependencies to /build/libs') {
+    from configurations.default
+    into(jarDir)
+}
+
+task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac') {
     doFirst {
         if (!jreDownloadDir.exists()) {
             jreDownloadDir.mkdirs()
         }
-
         // Filter out entries that already have JRE downloaded
         jreProperties.findAll {String sys, JreProperties props -> !props.jre.exists()}
                 .collect {String sys, JreProperties props ->
@@ -121,7 +97,6 @@ task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac, and c
         }*.join()
     }
 }
-
 // Execute downloadJre only when any one of three JREs is missing
 downloadJre.onlyIf {
     jreProperties.any {sys,props ->
@@ -181,16 +156,15 @@ unzipJre.onlyIf {
     }
 }
 
-build.dependsOn(unzipJre)
-
 distributions {
     launcherScripts.each { String sys, String scriptFileName ->
         String scriptFileDir = "${projectDir}/launcher-scripts/${scriptFileName}"
-
         "${sys}Packages" {
             baseName = "admin-console-package-for-${sys}"
             contents {
-                from {file(jarDir)}
+                from("${buildDir}") {
+                    include "libs/*"
+                }
                 from {file(jreExtractDir(sys))}
                 from {file(scriptFileDir)}
             }
@@ -198,19 +172,25 @@ distributions {
     }
 }
 
+Object[] dependentTasks = [unzipJre,copyDependencies]
+build.dependsOn(dependentTasks)
+
 // We want TAR files to be compressed by GZIP with the file extension of '.tar.gz'
 tasks.withType(Tar){
     compression = Compression.GZIP
     archiveExtension = 'tar.gz'
 }
+
 // We do not need the default distributions that have no JRE bundled
 distTar.enabled = false
 distZip.enabled = false
+
 // We do not need tar for Windows and zip for both Mac and Linux.
 windowsPackagesDistTar.enabled = false
 linuxPackagesDistZip.enabled = false
 macPackagesDistZip.enabled = false
+
 // These plugin-generated distribution tasks must run after JREs are downloaded and unzipped.
-linuxPackagesDistTar.mustRunAfter(unzipJre)
-macPackagesDistTar.mustRunAfter(unzipJre)
-windowsPackagesDistZip.mustRunAfter(unzipJre)
+linuxPackagesDistTar.mustRunAfter(dependentTasks)
+macPackagesDistTar.mustRunAfter(dependentTasks)
+windowsPackagesDistZip.mustRunAfter(dependentTasks)
