@@ -44,8 +44,6 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
   public static final int RESULT_CANCEL = 0;
   public static final int RESULT_OK = 1;
 
-  private static final int WINDOW_WIDTH = 300;
-
   private static final int PROXY_MIN = 1;
   private static final int PROXY_DEFAULT = 8080;
   private static final int PROXY_MAX = Short.MAX_VALUE - 1;
@@ -74,7 +72,7 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
 
   public ProxySettingsDialog(Frame frame, ProxySettings proxySettings) {
     super(frame);
-    
+
     this.proxySettings = proxySettings;
     saveButton = new JButton(BUTTON_SAVE);
     cancelButton = new JButton(BUTTON_CANCEL);

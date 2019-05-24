@@ -18,10 +18,12 @@
 package org.apereo.openequella.adminconsole.service;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -101,6 +103,10 @@ public class JarService {
 					return;
 				}
 
+				if (responseCode >= 400 || responseCode < 200){
+					throw new Exception("Error downloading jar: " + readError(conn));
+				}
+
 				// read etag and modified date
 				final String lastModified = conn.getHeaderField("Last-Modified");
 				final String etag = conn.getHeaderField("ETag");
@@ -158,6 +164,20 @@ public class JarService {
 	 */
 	private File getBinJarFile(String jarName) {
 		return StorageService.getFile(binFolder, jarName + ".jar");
+	}
+
+	private String readError(HttpURLConnection conn){
+		try (final BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())))) {
+			final StringBuilder sb = new StringBuilder();
+			String output;
+			while( (output = br.readLine()) != null ){
+				sb.append(output);
+			}
+			return sb.toString();
+		}
+		catch (IOException io){
+			throw new RuntimeException(io);
+		}
 	}
 
 	public static class JarMetadata {
