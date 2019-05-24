@@ -94,7 +94,6 @@ public class JarService {
 
 				if (metadataFile.exists()) {
 					final JarMetadata meta = JsonService.readFile(metadataFile, JarService.JarMetadata.class);
-					//conn.setRequestProperty("If-None-Match", meta.getEtag());
 					conn.setRequestProperty("If-Modified-Since", meta.getModifiedDate());
 				}
 				conn.connect();

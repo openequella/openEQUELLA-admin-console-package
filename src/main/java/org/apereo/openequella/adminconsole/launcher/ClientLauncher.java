@@ -30,8 +30,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
@@ -124,10 +122,6 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
       ComponentHelper.centreOnScreen(this);
       setVisible(true);
-      JRootPane rootPane = SwingUtilities.getRootPane(launchButton); 
-      rootPane.setDefaultButton(launchButton);
-      //getRootPane().setDefaultButton(launchButton);
-      
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -217,16 +211,14 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
           ClientLauncher.this.setVisible(false);
 
-          try
-          {
+          try {
             final JarService jarService = new JarService(url);
-            jarService.executeJar("adminconsole", "com.tle.admin.boot.Bootstrap", "-Djnlp.ENDPOINT=" + url, "-Dplugin.cache.dir=" + StorageService.getFolder("cache"));
+            jarService.executeJar("adminconsole", "com.tle.admin.boot.Bootstrap", "-Djnlp.ENDPOINT=" + url,
+                "-Dplugin.cache.dir=" + StorageService.getFolder("cache"));
 
             ClientLauncher.this.dispose();
             System.exit(0);
-          }
-          catch (Exception e)
-          {
+          } catch (Exception e) {
             LOGGER.error("Error invoking admin console", e);
             ClientLauncher.this.setVisible(true);
           }
@@ -392,6 +384,10 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
   @Override
   public void windowOpened(WindowEvent e) {
-    // We don't care about this event
+    if (serverPicker.getSelectedIndex() > 0) {
+      launchButton.requestFocus();
+    } else {
+      addServerButton.requestFocus();
+    }
   }
 }
