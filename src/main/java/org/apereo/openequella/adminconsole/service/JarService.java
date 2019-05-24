@@ -91,9 +91,10 @@ public class JarService {
 				conn.setConnectTimeout(10000);
 				conn.setReadTimeout(10000);
 				conn.setRequestMethod("GET");
+
 				if (metadataFile.exists()) {
 					final JarMetadata meta = JsonService.readFile(metadataFile, JarService.JarMetadata.class);
-					conn.setRequestProperty("If-None-Match", meta.getEtag());
+					//conn.setRequestProperty("If-None-Match", meta.getEtag());
 					conn.setRequestProperty("If-Modified-Since", meta.getModifiedDate());
 				}
 				conn.connect();
