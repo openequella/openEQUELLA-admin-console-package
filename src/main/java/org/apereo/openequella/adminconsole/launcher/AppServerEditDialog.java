@@ -53,7 +53,7 @@ public class AppServerEditDialog extends JDialog implements ActionListener, KeyL
 
   private final JTextField profileField;
   private final JTextField serverField;
-  private final JButton okButton;
+  private final JButton saveButton;
   private final JButton cancelButton;
   
 
@@ -67,7 +67,7 @@ public class AppServerEditDialog extends JDialog implements ActionListener, KeyL
     this.profile = profile;
     profileField = new JTextField();
     serverField = new JTextField();
-    okButton = new JButton(BUTTON_SAVE);
+    saveButton = new JButton(BUTTON_SAVE);
     cancelButton = new JButton(BUTTON_CANCEL);
 
     setup();
@@ -85,10 +85,10 @@ public class AppServerEditDialog extends JDialog implements ActionListener, KeyL
     profileField.addKeyListener(this);
     serverField.addKeyListener(this);
 
-    okButton.addActionListener(this);
+    saveButton.addActionListener(this);
     cancelButton.addActionListener(this);
 
-    okButton.setEnabled(false);
+    saveButton.setEnabled(false);
 
     final int width1 = profileLabel.getPreferredSize().width;
     final int width2 = cancelButton.getPreferredSize().width;
@@ -107,13 +107,13 @@ public class AppServerEditDialog extends JDialog implements ActionListener, KeyL
     all.add(serverLabel, new Rectangle(0, 2, 4, 1));
     all.add(serverField, new Rectangle(0, 3, 4, 1));
 
-    all.add(okButton, new Rectangle(2, 5, 1, 1));
+    all.add(saveButton, new Rectangle(2, 5, 1, 1));
     all.add(cancelButton, new Rectangle(3, 5, 1, 1));
 
     setModal(true);
     setTitle(WINDOW_TITLE);
     getContentPane().add(all);
-    getRootPane().setDefaultButton(okButton);
+    getRootPane().setDefaultButton(saveButton);
 
     pack();
     ComponentHelper.ensureMinimumSize(this, 500, 0);
@@ -136,12 +136,12 @@ public class AppServerEditDialog extends JDialog implements ActionListener, KeyL
     boolean profileEmpty = profileField.getText().trim().length() == 0;
     boolean serverEmpty = serverField.getText().trim().length() == 0;
 
-    okButton.setEnabled(!profileEmpty && !serverEmpty);
+    saveButton.setEnabled(!profileEmpty && !serverEmpty);
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (e.getSource() == okButton) {
+    if (e.getSource() == saveButton) {
       result = RESULT_OK;
       dispose();
     } else if (e.getSource() == cancelButton) {

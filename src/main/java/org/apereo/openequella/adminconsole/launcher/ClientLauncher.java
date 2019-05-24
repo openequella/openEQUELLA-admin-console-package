@@ -50,7 +50,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
   private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientLauncher.class);
 
-  private static final int WINDOW_WIDTH = 450;
+  private static final int WINDOW_WIDTH = 550;
 
   private static final String WINDOW_TITLE = "openEQUELLA Administration Console Launcher";
   private static final String LABEL_SERVER = "Server:";
@@ -198,7 +198,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
       @Override
       public Object doInBackground() throws Exception {
         final ProxySettings p = config.getProxy();
-        if (p != null) {
+        if (p != null && p.getHost() != null && !p.getHost().trim().equals("")) {
           Proxy.setProxy(p.getHost(), p.getPort(), p.getUsername(), p.getPassword());
         }
 
