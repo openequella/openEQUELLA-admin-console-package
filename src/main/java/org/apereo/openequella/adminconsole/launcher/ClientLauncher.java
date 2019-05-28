@@ -339,7 +339,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
               .map(Path::toFile)
               .forEach(File::delete);
         } catch (Exception e) {
-          LOGGER.error("Problem removing client", e);
+          LOGGER.error("Problem removing server", e);
           JOptionPane.showMessageDialog(
               ClientLauncher.this, "Problem removing server: " + e.getMessage());
         }
