@@ -37,8 +37,16 @@ public class StorageService {
 		return new File(folder, fileName);
 	}
 
-	public static File getFolder(String folderName){
-		final File folder = new File(getBaseFolder(), folderName);
+	public static File getServerConfigFolder(String uuid) {
+		final File folder = new File(getBaseFolder(), uuid);
+		if (!folder.exists()){
+			folder.mkdir();
+		}
+		return folder;
+	}
+
+	public static File getCacheFolder(String uuid, String folderName){
+		final File folder = new File(getServerConfigFolder(uuid), folderName);
 		if (!folder.exists()){
 			folder.mkdir();
 		}
