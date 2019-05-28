@@ -30,6 +30,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
@@ -50,7 +51,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
   private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientLauncher.class);
 
-  private static final int WINDOW_WIDTH = 450;
+  private static final int WINDOW_WIDTH = 550;
 
   private static final String WINDOW_TITLE = "openEQUELLA Administration Console Launcher";
   private static final String LABEL_SERVER = "Server:";
@@ -197,12 +198,12 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
     final SwingWorker<Object, Object> worker = new SwingWorker<Object, Object>() {
       @Override
       public Object doInBackground() throws Exception {
-        final ProxySettings p = config.getProxy();
-        if (p != null) {
-          Proxy.setProxy(p.getHost(), p.getPort(), p.getUsername(), p.getPassword());
-        }
-
         try {
+          final ProxySettings p = config.getProxy();
+          if (p != null && p.getHost() != null && !p.getHost().trim().equals("")) {
+            Proxy.setProxy(p.getHost(), p.getPort(), p.getUsername(), p.getPassword());
+          }
+
           String url = serverProfile.getUrl().trim();
           if (!url.endsWith("/")) {
             url += '/';
@@ -212,14 +213,20 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
           ClientLauncher.this.setVisible(false);
 
           final JarService jarService = new JarService(url);
-          jarService.executeJar("adminconsole", "com.tle.admin.boot.Bootstrap",
-              "-Djnlp.ENDPOINT=" + url, "-Dplugin.cache.dir=" + StorageService.getFolder("cache"));
+          jarService.executeJar("adminconsole", "com.tle.admin.boot.Bootstrap", "-Djnlp.ENDPOINT=" + url,
+              "-Dplugin.cache.dir=" + StorageService.getFolder("cache"));
 
           ClientLauncher.this.dispose();
           System.exit(0);
-        } catch (Throwable e) {
-          LOGGER.error("Error invoking admin console", e);
-          System.exit(1);
+        }
+        catch (Throwable t){
+          SwingUtilities.invokeLater(() -> {
+            LOGGER.error("Problem launching client", t);
+            JOptionPane.showMessageDialog(
+                ClientLauncher.this, "Problem launching client: " + t.getMessage());
+              
+            ClientLauncher.this.setVisible(true);
+          });
         }
         return null;
       }
@@ -378,6 +385,10 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
   @Override
   public void windowOpened(WindowEvent e) {
-    // We don't care about this event
+    if (serverPicker.getSelectedIndex() >= 0) {
+      launchButton.requestFocus();
+    } else {
+      addServerButton.requestFocus();
+    }
   }
 }
