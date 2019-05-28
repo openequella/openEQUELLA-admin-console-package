@@ -44,10 +44,10 @@ public class JarService {
 	private final File cacheFolder;
 	private final File binFolder;
 
-	public JarService(String baseUrl) {
+	public JarService(String baseUrl, String uuid) {
 		this.baseUrl = baseUrl;
-		this.cacheFolder = StorageService.getFolder("cache");
-		this.binFolder = StorageService.getFolder("bin");
+		this.cacheFolder = StorageService.getCacheFolder(uuid,"cache");
+		this.binFolder = StorageService.getCacheFolder(uuid,"bin");
 	}
 
 	public void ensureBinJars(String... jarNames) {
@@ -94,6 +94,7 @@ public class JarService {
 
 				if (metadataFile.exists()) {
 					final JarMetadata meta = JsonService.readFile(metadataFile, JarService.JarMetadata.class);
+					conn.setRequestProperty("If-None-Match", meta.getEtag());
 					conn.setRequestProperty("If-Modified-Since", meta.getModifiedDate());
 				}
 				conn.connect();

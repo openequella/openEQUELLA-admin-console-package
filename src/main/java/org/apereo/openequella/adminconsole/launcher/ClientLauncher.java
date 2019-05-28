@@ -22,6 +22,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -205,6 +210,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
           }
 
           String url = serverProfile.getUrl().trim();
+          String uuid = serverProfile.getUuid();
           if (!url.endsWith("/")) {
             url += '/';
           }
@@ -212,9 +218,9 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
           ClientLauncher.this.setVisible(false);
 
-          final JarService jarService = new JarService(url);
+          final JarService jarService = new JarService(url,uuid);
           jarService.executeJar("adminconsole", "com.tle.admin.boot.Bootstrap", "-Djnlp.ENDPOINT=" + url,
-              "-Dplugin.cache.dir=" + StorageService.getFolder("cache"));
+              "-Dplugin.cache.dir=" + StorageService.getCacheFolder(uuid,"cache"));
 
           ClientLauncher.this.dispose();
           System.exit(0);
@@ -313,13 +319,30 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
   protected boolean handleRemoveServer(int index) {
     if (index > -1) {
       final ServerProfile profile = (ServerProfile) serverPicker.getSelectedItem();
-      final int result = JOptionPane.showConfirmDialog(this, PROMPT_REMOVE, REMOVE_SERVER_TITLE,
-          JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+      final String uuid = ((ServerProfile) serverPicker.getSelectedItem()).getUuid();
+      final int result =
+          JOptionPane.showConfirmDialog(
+              this,
+              PROMPT_REMOVE,
+              REMOVE_SERVER_TITLE,
+              JOptionPane.YES_NO_OPTION,
+              JOptionPane.QUESTION_MESSAGE);
 
       if (result == JOptionPane.YES_OPTION) {
-        serverPicker.removeItemAt(index);
+        try {
+          serverPicker.removeItemAt(index);
+          config.getServers().remove(profile);
 
-        config.getServers().remove(profile);
+          File serverConfigFolder = StorageService.getServerConfigFolder(uuid);
+          Files.walk(serverConfigFolder.toPath())
+              .sorted(Comparator.reverseOrder())
+              .map(Path::toFile)
+              .forEach(File::delete);
+        } catch (Exception e) {
+          LOGGER.error("Problem launching client", e);
+          JOptionPane.showMessageDialog(
+              ClientLauncher.this, "Problem removing server: " + e.getMessage());
+        }
 
         updateButtons();
         return true;
