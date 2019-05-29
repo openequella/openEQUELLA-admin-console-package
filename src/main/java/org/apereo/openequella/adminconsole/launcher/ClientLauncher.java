@@ -17,7 +17,7 @@
  */
 package org.apereo.openequella.adminconsole.launcher;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -28,16 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-import javax.swing.UIManager;
+import javax.swing.*;
 
 import org.apereo.openequella.adminconsole.config.Config;
 import org.apereo.openequella.adminconsole.config.ProxySettings;
@@ -72,6 +63,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
   private static final String PROMPT_REMOVE = "Are you sure you want to remove this server?";
   private static final String MAKE_DEFAULT_TITLE = "Make default?";
   private static final String PROMPT_MAKE_DEFAULT = "Make this server the default server to show?";
+  private static final String LOADING_DIALOG_TITLE = "Connecting...";
 
   private Config config;
 
@@ -201,6 +193,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
   private void launch(final ServerProfile serverProfile) {
     final SwingWorker<Object, Object> worker = new SwingWorker<Object, Object>() {
+      final JDialog loadingDialog = new JDialog();
       @Override
       public Object doInBackground() throws Exception {
         try {
@@ -218,20 +211,34 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
           ClientLauncher.this.setVisible(false);
 
+          // Create a temporary dialog simply displaying a progress bar in indeterminate mode
+          loadingDialog.setTitle(LOADING_DIALOG_TITLE);
+          loadingDialog.setSize(new Dimension(200,50));
+          final JProgressBar loadingProgressBar = new JProgressBar();
+          loadingProgressBar.setIndeterminate(true);
+          loadingDialog.add(loadingProgressBar);
+          loadingDialog.setVisible(true);
+          ComponentHelper.centreOnScreen(loadingDialog);
+
+          // Call ensureBinJars to check if cached files are ready
           final JarService jarService = new JarService(url,uuid);
-          jarService.executeJar("adminconsole", "com.tle.admin.boot.Bootstrap", "-Djnlp.ENDPOINT=" + url,
+          final String jarName = "adminconsole";
+          jarService.ensureBinJars(jarName);
+          loadingDialog.dispose();
+
+          jarService.executeJar(jarName, "com.tle.admin.boot.Bootstrap", "-Djnlp.ENDPOINT=" + url,
               "-Dplugin.cache.dir=" + StorageService.getCacheFolder(uuid,"cache"));
 
-          ClientLauncher.this.dispose();
-          System.exit(0);
+          ClientLauncher.this.setVisible(true);
         }
         catch (Throwable t){
           SwingUtilities.invokeLater(() -> {
             LOGGER.error("Problem launching client", t);
             JOptionPane.showMessageDialog(
                 ClientLauncher.this, "Problem launching client: " + t.getMessage());
-              
+            loadingDialog.dispose();
             ClientLauncher.this.setVisible(true);
+
           });
         }
         return null;

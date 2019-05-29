@@ -134,7 +134,6 @@ public class JarService {
 	}
 
 	public int executeJar(String jarName, String mainClass, String... jvmArgs) {
-		ensureBinJars(jarName);
 		final File binJar = getBinJarFile(jarName);
 		final List<String> command = new ArrayList<>();
 		command.add("java");
