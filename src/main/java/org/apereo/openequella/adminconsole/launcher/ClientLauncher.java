@@ -84,6 +84,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
       BlindSSLSocketFactory.register();
 
+      this.setIconImage(new ImageIcon(getClass().getResource("/adminconsoleicon.png")).getImage());
       config = readConfig();
       serverPicker = new ServerPicker(config);
       addServerButton = new JButton(ADD_SERVER_BUTTON);
