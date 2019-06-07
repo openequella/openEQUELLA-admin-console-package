@@ -17,19 +17,6 @@
  */
 package org.apereo.openequella.adminconsole.launcher;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
-
-import javax.swing.*;
-
 import org.apereo.openequella.adminconsole.config.Config;
 import org.apereo.openequella.adminconsole.config.ProxySettings;
 import org.apereo.openequella.adminconsole.config.ServerProfile;
@@ -42,6 +29,17 @@ import org.apereo.openequella.adminconsole.util.BlindSSLSocketFactory;
 import org.apereo.openequella.adminconsole.util.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 
 public class ClientLauncher extends JFrame implements ActionListener, WindowListener {
   private static final long serialVersionUID = 1L;
@@ -74,6 +72,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
   private final JButton makeDefaultServerButton;
   private final JButton editProxyButton;
   private final JButton launchButton;
+  private final Image icon;
 
   public static void main(String args[]) throws Exception {
     new ClientLauncher();
@@ -84,7 +83,6 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
       BlindSSLSocketFactory.register();
 
-      this.setIconImage(new ImageIcon(getClass().getResource("/adminconsoleicon.png")).getImage());
       config = readConfig();
       serverPicker = new ServerPicker(config);
       addServerButton = new JButton(ADD_SERVER_BUTTON);
@@ -94,6 +92,8 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
       makeDefaultServerButton = new JButton(MAKE_DEFAULT_SERVER_BUTTON);
       launchButton = new JButton(LAUNCH_BUTTON);
 
+      icon = new ImageIcon(getClass().getResource("/adminconsoleicon.png")).getImage();
+      setIconImage(icon);
       setTitle(WINDOW_TITLE);
       setResizable(false);
       addWindowListener(this);
@@ -214,6 +214,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
           // Create a temporary dialog simply displaying a progress bar in indeterminate mode
           loadingDialog.setTitle(LOADING_DIALOG_TITLE);
+          loadingDialog.setIconImage(icon);
           loadingDialog.setSize(new Dimension(200,50));
           final JProgressBar loadingProgressBar = new JProgressBar();
           loadingProgressBar.setIndeterminate(true);
