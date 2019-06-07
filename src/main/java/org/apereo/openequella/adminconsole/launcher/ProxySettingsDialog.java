@@ -40,7 +40,7 @@ import org.apereo.openequella.adminconsole.swing.TableLayout;
 
 public class ProxySettingsDialog extends JDialog implements ActionListener {
   private static final long serialVersionUID = 1L;
-  
+
   public static final int RESULT_CANCEL = 0;
   public static final int RESULT_OK = 1;
 
@@ -53,8 +53,8 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
   private static final String LABEL_PROXY_HOST = "Proxy Host:";
   private static final String LABEL_PROXY_PORT = "Proxy Port:";
   private static final String LABEL_PROXY_USERNAME = "Username:";
-  private static final String LABEL_PROXY_PASSWORD = "Password:"; 
-  
+  private static final String LABEL_PROXY_PASSWORD = "Password:";
+
   private static final String BUTTON_SAVE = "Save";
   private static final String BUTTON_CANCEL = "Cancel";
 
@@ -63,7 +63,7 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
   private int result = RESULT_CANCEL;
 
   private JTextField hostField;
-  private SpinnerNumberModel portModel;
+  private JTextField portField;
   private JTextField usernameField;
   private JPasswordField passwordField;
 
@@ -79,27 +79,32 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
     usernameField = new JTextField();
     passwordField = new JPasswordField();
     hostField = new JTextField();
-    portModel = new SpinnerNumberModel(PROXY_DEFAULT, PROXY_MIN, PROXY_MAX, PROXY_STEP);
-    
+    portField = new JTextField();
+    //portModel = new SpinnerNumberModel(PROXY_DEFAULT, PROXY_MIN, PROXY_MAX, PROXY_STEP);
+
     setup();
 
     hostField.setText(proxySettings.getHost());
-    portModel.setValue(proxySettings.getPort());
+    final int port = proxySettings.getPort();
+    if (port == 0) {
+      portField.setText("");
+    } else {
+      portField.setText(Integer.toString(port));
+    }
     usernameField.setText(proxySettings.getUsername());
     passwordField.setText(proxySettings.getPassword());
   }
 
   private void setup() {
-    
+
     saveButton.addActionListener(this);
     cancelButton.addActionListener(this);
 
     final JComponent mainPanel = createMainPanel();
     final int buttonWidth = cancelButton.getPreferredSize().width;
-    JPanel all = new JPanel(new TableLayout(
-      new int[]{ mainPanel.getPreferredSize().height, saveButton.getPreferredSize().height },
-      new int[]{ TableLayout.FILL, buttonWidth, buttonWidth }
-    ));
+    JPanel all = new JPanel(
+        new TableLayout(new int[] { mainPanel.getPreferredSize().height, saveButton.getPreferredSize().height },
+            new int[] { TableLayout.FILL, buttonWidth, buttonWidth }));
     all.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
     all.add(mainPanel, new Rectangle(0, 0, 3, 1));
@@ -118,13 +123,11 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
   }
 
   protected JComponent createMainPanel() {
-    
+
     final JLabel hostLabel = new JLabel(LABEL_PROXY_HOST);
     final JLabel portLabel = new JLabel(LABEL_PROXY_PORT);
     final JLabel usernameLabel = new JLabel(LABEL_PROXY_USERNAME);
     final JLabel passwordLabel = new JLabel(LABEL_PROXY_PASSWORD);
-
-    final JSpinner portSpinner = new JSpinner(portModel);
 
     final int height1 = hostField.getPreferredSize().height;
     final int[] rows = { height1, height1, height1, height1, height1, height1, height1, height1 };
@@ -135,7 +138,7 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
     hostPanel.add(hostLabel, new Rectangle(0, 0, 1, 1));
     hostPanel.add(hostField, new Rectangle(0, 1, 1, 1));
     hostPanel.add(portLabel, new Rectangle(0, 2, 1, 1));
-    hostPanel.add(portSpinner, new Rectangle(0, 3, 1, 1));
+    hostPanel.add(portField, new Rectangle(0, 3, 1, 1));
     hostPanel.add(usernameLabel, new Rectangle(0, 4, 1, 1));
     hostPanel.add(usernameField, new Rectangle(0, 5, 1, 1));
     hostPanel.add(passwordLabel, new Rectangle(0, 6, 1, 1));
@@ -146,7 +149,16 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
 
   public ProxySettings getUpdatedSettings() {
     proxySettings.setHost(hostField.getText());
-    proxySettings.setPort(portModel.getNumber().intValue());
+    int port = 0;
+    final String portText = portField.getText().trim();
+    if (!portText.equals("")) {
+      try {
+        port = Integer.parseInt(portField.getText());
+      } catch (NumberFormatException nfe) {
+        // Don't care
+      }
+    }
+    proxySettings.setPort(port);
     proxySettings.setUsername(usernameField.getText());
     proxySettings.setPassword(new String(passwordField.getPassword()));
     return proxySettings;

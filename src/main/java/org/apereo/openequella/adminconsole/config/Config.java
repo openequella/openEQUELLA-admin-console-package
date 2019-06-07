@@ -18,6 +18,9 @@
 package org.apereo.openequella.adminconsole.config;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,6 +77,28 @@ public class Config {
 			}
 		}
 		return false;
+	}
+
+	public static void backupServerConfigFile(){
+		copyFiles(getServerConfigFile(), StorageService.getFile("config.json.bak"));
+	}
+
+	public static void restoreServerConfigFile(){
+		copyFiles(StorageService.getFile("config.json.bak"), getServerConfigFile());
+	}
+
+	private static void copyFiles(File src, File dest) {
+		if (src.exists())
+		{
+			try
+			{
+				Files.copy(src.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			}
+			catch (IOException io)
+			{
+				throw new RuntimeException(io);
+			}
+		}
 	}
 
     private static File getServerConfigFile(){
