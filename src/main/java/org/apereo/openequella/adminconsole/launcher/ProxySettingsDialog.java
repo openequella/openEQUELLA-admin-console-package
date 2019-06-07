@@ -22,6 +22,7 @@ import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -30,9 +31,8 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.JFormattedTextField;
 
 import org.apereo.openequella.adminconsole.config.ProxySettings;
 import org.apereo.openequella.adminconsole.swing.ComponentHelper;
@@ -44,10 +44,7 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
   public static final int RESULT_CANCEL = 0;
   public static final int RESULT_OK = 1;
 
-  private static final int PROXY_MIN = 0;
   private static final int PROXY_DEFAULT = 8080;
-  private static final int PROXY_MAX = Short.MAX_VALUE - 1;
-  private static final int PROXY_STEP = 1;
 
   private static final String WINDOW_TITLE = "Proxy Settings";
   private static final String LABEL_PROXY_HOST = "Proxy Host:";
@@ -63,9 +60,9 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
   private int result = RESULT_CANCEL;
 
   private JTextField hostField;
-  private SpinnerNumberModel portModel;
   private JTextField usernameField;
   private JPasswordField passwordField;
+  private JTextField portField;
 
   private JButton saveButton;
   private JButton cancelButton;
@@ -79,14 +76,20 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
     usernameField = new JTextField();
     passwordField = new JPasswordField();
     hostField = new JTextField();
-    portModel = new SpinnerNumberModel(PROXY_DEFAULT, PROXY_MIN, PROXY_MAX, PROXY_STEP);
-    
+
+    // Use DecimalFormat to filter non-digit characters
+    DecimalFormat portFormate = new DecimalFormat();
+    // Call setGroupingUsed to remove the comma between digits
+    portFormate.setGroupingUsed(false);
+    portField = new JFormattedTextField(portFormate);
+
     setup();
 
     hostField.setText(proxySettings.getHost());
-    portModel.setValue(proxySettings.getPort());
     usernameField.setText(proxySettings.getUsername());
     passwordField.setText(proxySettings.getPassword());
+    int port = proxySettings.getPort();
+    portField.setText(String.valueOf(port == 0 ? PROXY_DEFAULT : port));
   }
 
   private void setup() {
@@ -124,8 +127,6 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
     final JLabel usernameLabel = new JLabel(LABEL_PROXY_USERNAME);
     final JLabel passwordLabel = new JLabel(LABEL_PROXY_PASSWORD);
 
-    final JSpinner portSpinner = new JSpinner(portModel);
-
     final int height1 = hostField.getPreferredSize().height;
     final int[] rows = { height1, height1, height1, height1, height1, height1, height1, height1 };
     final int[] cols = { TableLayout.FILL };
@@ -135,7 +136,7 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
     hostPanel.add(hostLabel, new Rectangle(0, 0, 1, 1));
     hostPanel.add(hostField, new Rectangle(0, 1, 1, 1));
     hostPanel.add(portLabel, new Rectangle(0, 2, 1, 1));
-    hostPanel.add(portSpinner, new Rectangle(0, 3, 1, 1));
+    hostPanel.add(portField, new Rectangle(0, 3, 1, 1));
     hostPanel.add(usernameLabel, new Rectangle(0, 4, 1, 1));
     hostPanel.add(usernameField, new Rectangle(0, 5, 1, 1));
     hostPanel.add(passwordLabel, new Rectangle(0, 6, 1, 1));
@@ -146,7 +147,9 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
 
   public ProxySettings getUpdatedSettings() {
     proxySettings.setHost(hostField.getText());
-    proxySettings.setPort(portModel.getNumber().intValue());
+
+    int port = (portField.getText().isEmpty() ? PROXY_DEFAULT : Integer.parseInt(portField.getText()));
+    proxySettings.setPort(port);
     proxySettings.setUsername(usernameField.getText());
     proxySettings.setPassword(new String(passwordField.getPassword()));
     return proxySettings;

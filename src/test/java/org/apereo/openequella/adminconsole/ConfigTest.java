@@ -24,6 +24,7 @@ import java.util.List;
 import org.apereo.openequella.adminconsole.config.Config;
 import org.apereo.openequella.adminconsole.config.ProxySettings;
 import org.apereo.openequella.adminconsole.config.ServerProfile;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,7 +36,12 @@ public class ConfigTest {
 
     @Before
     public void removeExisting() {
-        Config.deleteServerConfigFile();
+        Config.backupServerConfigFile();
+    }
+
+    @After
+    public void restoreExisting() {
+        Config.restoreServerConfigFile();
     }
 
     @Test
