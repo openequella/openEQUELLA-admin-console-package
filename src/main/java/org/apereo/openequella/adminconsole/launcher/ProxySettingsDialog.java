@@ -44,8 +44,6 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
   public static final int RESULT_CANCEL = 0;
   public static final int RESULT_OK = 1;
 
-  private static final int PROXY_DEFAULT = 8080;
-
   private static final String WINDOW_TITLE = "Proxy Settings";
   private static final String LABEL_PROXY_HOST = "Proxy Host:";
   private static final String LABEL_PROXY_PORT = "Proxy Port:";
