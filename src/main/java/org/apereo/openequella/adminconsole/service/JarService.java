@@ -140,7 +140,7 @@ public class JarService {
 		final String os = System.getProperty("os.name");
 		final String bundledJrePath = System.getProperty("user.dir")+"/jdk8u212-b03-jre/";
 		final String binPath = os.toLowerCase().indexOf("mac") > 0? "Contents/Home/bin/" : "bin/";
-    	command.add(bundledJrePath+binPath+"java");
+		command.add(bundledJrePath+binPath+"java");
 		command.add("-cp");
 		command.add(jarName + ".jar");
 		command.addAll(Arrays.asList(jvmArgs));
