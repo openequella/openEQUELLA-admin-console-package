@@ -138,9 +138,11 @@ public class JarService {
 		final List<String> command = new ArrayList<>();
 		// Use the bundled JRE to run admin console
 		final String os = System.getProperty("os.name");
-		final String bundledJrePath = System.getProperty("user.dir")+"/jdk8u212-b03-jre/";
-		final String binPath = os.toLowerCase().indexOf("mac") > 0? "Contents/Home/bin/" : "bin/";
-		command.add(bundledJrePath+binPath+"java");
+		final File currentPath = new File(System.getProperty("user.dir"));
+		final File bundledJrePath = new File(currentPath, "jdk8u212-b03-jre");
+		final File binPath = new File(bundledJrePath, os.toLowerCase().contains("mac") ? "Contents/Home/bin/" : "bin");
+		final String fullJavaPath = new File(binPath, "java").getAbsolutePath();
+		command.add(fullJavaPath);
 		command.add("-cp");
 		command.add(jarName + ".jar");
 		command.addAll(Arrays.asList(jvmArgs));
