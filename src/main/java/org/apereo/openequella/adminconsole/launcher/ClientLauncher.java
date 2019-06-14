@@ -194,14 +194,13 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
   private void launch(final ServerProfile serverProfile) {
     final SwingWorker<Object, Object> worker = new SwingWorker<Object, Object>() {
-      final JDialog loadingDialog = new JDialog();
+      final LoadingDialog loadingDialog = new LoadingDialog(ClientLauncher.this, icon, LOADING_DIALOG_TITLE);
+
       @Override
       public Object doInBackground() throws Exception {
         try {
           final ProxySettings p = config.getProxy();
-          if (p != null && p.getHost() != null && !p.getHost().trim().equals("")) {
-            Proxy.setProxy(p.getHost(), p.getPort(), p.getUsername(), p.getPassword());
-          }
+          Proxy.setProxy(p.getHost(), p.getPort(), p.getUsername(), p.getPassword());
 
           String url = serverProfile.getUrl().trim();
           String uuid = serverProfile.getUuid();
@@ -211,37 +210,27 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
           LOGGER.info("Endpoint:  " + url);
 
           ClientLauncher.this.setVisible(false);
-
           // Create a temporary dialog simply displaying a progress bar in indeterminate mode
-          loadingDialog.setTitle(LOADING_DIALOG_TITLE);
-          loadingDialog.setIconImage(icon);
-          loadingDialog.setSize(new Dimension(200,50));
-          final JProgressBar loadingProgressBar = new JProgressBar();
-          loadingProgressBar.setIndeterminate(true);
-          loadingDialog.add(loadingProgressBar);
           loadingDialog.setVisible(true);
-          ComponentHelper.centreOnScreen(loadingDialog);
 
           // Call ensureBinJars to check if cached files are ready
-          final JarService jarService = new JarService(url,uuid);
+          final JarService jarService = new JarService(url, uuid);
           final String jarName = "adminconsole";
           jarService.ensureBinJars(jarName);
-          loadingDialog.dispose();
+          loadingDialog.setVisible(false);
 
           jarService.executeJar(jarName, "com.tle.admin.boot.Bootstrap", "-Djnlp.ENDPOINT=" + url,
-              "-Dplugin.cache.dir=" + StorageService.getCacheFolder(uuid,"cache"));
+              "-Dplugin.cache.dir=" + StorageService.getCacheFolder(uuid, "cache"));
 
           ClientLauncher.this.setVisible(true);
-        }
-        catch (Throwable t){
+        } catch (Throwable t) {
           SwingUtilities.invokeLater(() -> {
             LOGGER.error("Problem launching client", t);
-            JOptionPane.showMessageDialog(
-                ClientLauncher.this, "Problem launching client: " + t.getMessage());
-            loadingDialog.dispose();
+            JOptionPane.showMessageDialog(ClientLauncher.this, "Problem launching client: " + t.getMessage());
             ClientLauncher.this.setVisible(true);
-
           });
+        } finally {
+          loadingDialog.dispose();
         }
         return null;
       }
@@ -329,13 +318,8 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
     if (index > -1) {
       final ServerProfile profile = (ServerProfile) serverPicker.getSelectedItem();
       final String uuid = ((ServerProfile) serverPicker.getSelectedItem()).getUuid();
-      final int result =
-          JOptionPane.showConfirmDialog(
-              this,
-              PROMPT_REMOVE,
-              REMOVE_SERVER_TITLE,
-              JOptionPane.YES_NO_OPTION,
-              JOptionPane.QUESTION_MESSAGE);
+      final int result = JOptionPane.showConfirmDialog(this, PROMPT_REMOVE, REMOVE_SERVER_TITLE,
+          JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
       if (result == JOptionPane.YES_OPTION) {
         try {
@@ -343,14 +327,11 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
           config.getServers().remove(profile);
 
           File serverConfigFolder = StorageService.getServerConfigFolder(uuid);
-          Files.walk(serverConfigFolder.toPath())
-              .sorted(Comparator.reverseOrder())
-              .map(Path::toFile)
+          Files.walk(serverConfigFolder.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile)
               .forEach(File::delete);
         } catch (Exception e) {
           LOGGER.error("Problem removing server", e);
-          JOptionPane.showMessageDialog(
-              ClientLauncher.this, "Problem removing server: " + e.getMessage());
+          JOptionPane.showMessageDialog(ClientLauncher.this, "Problem removing server: " + e.getMessage());
         }
 
         updateButtons();
