@@ -46,8 +46,8 @@ public class JarService {
 
 	public JarService(String baseUrl, String uuid) {
 		this.baseUrl = baseUrl;
-		this.cacheFolder = StorageService.getCacheFolder(uuid,"cache");
-		this.binFolder = StorageService.getCacheFolder(uuid,"bin");
+		this.cacheFolder = StorageService.getCacheFolder(uuid, "cache");
+		this.binFolder = StorageService.getCacheFolder(uuid, "bin");
 	}
 
 	public void ensureBinJars(String... jarNames) {
@@ -104,8 +104,15 @@ public class JarService {
 					return;
 				}
 
-				if (responseCode >= 400 || responseCode < 200){
+				if (responseCode >= 400 || responseCode < 200) {
 					throw new Exception("Error downloading jar: " + readError(conn));
+				}
+
+				// download and store in our cache
+				try (InputStream is = (InputStream) conn.getInputStream();
+						BufferedInputStream bis = new BufferedInputStream(is);
+						FileOutputStream fos = new FileOutputStream(jarFile)) {
+					StreamUtils.copyStream(bis, fos);
 				}
 
 				// read etag and modified date
@@ -115,13 +122,6 @@ public class JarService {
 				meta.setModifiedDate(lastModified);
 				meta.setEtag(etag);
 				JsonService.writeFile(metadataFile, meta);
-
-				// download and store in our cache
-				try (InputStream is = (InputStream) conn.getInputStream();
-						BufferedInputStream bis = new BufferedInputStream(is);
-						FileOutputStream fos = new FileOutputStream(jarFile)) {
-					StreamUtils.copyStream(bis, fos);
-				}
 			} finally {
 				if (conn != null) {
 					conn.disconnect();
@@ -134,19 +134,26 @@ public class JarService {
 	}
 
 	public int executeJar(String jarName, String mainClass, String... jvmArgs) {
-		final File binJar = getBinJarFile(jarName);
-		final List<String> command = new ArrayList<>();
 		// Use the bundled JRE to run admin console
-		final String os = System.getProperty("os.name");
-		final File currentPath = new File(System.getProperty("user.dir"));
-		final File bundledJrePath = new File(currentPath, "jdk8u212-b03-jre");
-		final File binPath = new File(bundledJrePath, os.toLowerCase().contains("mac") ? "Contents/Home/bin/" : "bin");
-		final String fullJavaPath = new File(binPath, "java").getAbsolutePath();
-		command.add(fullJavaPath);
+		String javaFullPath = System.getProperty("LAUNCHER_JAVA_PATH");
+		if (javaFullPath == null) {
+			// Rely on the existing installed java being on the path
+			javaFullPath = "java";
+		}
+		LOGGER.info("Using java at: " + javaFullPath);
+
+		final List<String> command = new ArrayList<>();
+		command.add(javaFullPath);
 		command.add("-cp");
 		command.add(jarName + ".jar");
 		command.addAll(Arrays.asList(jvmArgs));
 		command.add(mainClass);
+		LOGGER.info("Launching downloaded jar via:");
+		LOGGER.info(javaFullPath + " -cp " + jarName + ".jar " + String.join(" ", jvmArgs) + " " + mainClass);
+
+		final File binJar = getBinJarFile(jarName);
+		LOGGER.info("From directory:");
+		LOGGER.info(binJar.getParentFile().getAbsolutePath());
 
 		return ExecUtils.exec(command.toArray(new String[] {}), null, binJar.getParentFile());
 	}
@@ -172,16 +179,15 @@ public class JarService {
 		return StorageService.getFile(binFolder, jarName + ".jar");
 	}
 
-	private String readError(HttpURLConnection conn){
+	private String readError(HttpURLConnection conn) {
 		try (final BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())))) {
 			final StringBuilder sb = new StringBuilder();
 			String output;
-			while( (output = br.readLine()) != null ){
+			while ((output = br.readLine()) != null) {
 				sb.append(output);
 			}
 			return sb.toString();
-		}
-		catch (IOException io){
+		} catch (IOException io) {
 			throw new RuntimeException(io);
 		}
 	}
