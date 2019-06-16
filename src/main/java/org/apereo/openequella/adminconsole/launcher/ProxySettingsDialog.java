@@ -44,8 +44,6 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
   public static final int RESULT_CANCEL = 0;
   public static final int RESULT_OK = 1;
 
-  private static final int PROXY_DEFAULT = 8080;
-
   private static final String WINDOW_TITLE = "Proxy Settings";
   private static final String LABEL_PROXY_HOST = "Proxy Host:";
   private static final String LABEL_PROXY_PORT = "Proxy Port:";
@@ -89,7 +87,7 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
     usernameField.setText(proxySettings.getUsername());
     passwordField.setText(proxySettings.getPassword());
     int port = proxySettings.getPort();
-    portField.setText(String.valueOf(port == 0 ? PROXY_DEFAULT : port));
+    portField.setText(String.valueOf(port == 0 ? "" : port));
   }
 
   private void setup() {
@@ -147,8 +145,8 @@ public class ProxySettingsDialog extends JDialog implements ActionListener {
 
   public ProxySettings getUpdatedSettings() {
     proxySettings.setHost(hostField.getText());
-
-    int port = (portField.getText().isEmpty() ? PROXY_DEFAULT : Integer.parseInt(portField.getText()));
+    // As the type of port is int, use 0 to represent null
+    int port = (portField.getText().isEmpty() ? 0 : Integer.parseInt(portField.getText()));
     proxySettings.setPort(port);
     proxySettings.setUsername(usernameField.getText());
     proxySettings.setPassword(new String(passwordField.getPassword()));
