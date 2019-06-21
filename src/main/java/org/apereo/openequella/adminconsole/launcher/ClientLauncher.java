@@ -220,7 +220,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
           loadingDialog.setVisible(false);
 
           jarService.executeJar(jarName, "com.tle.admin.boot.Bootstrap", "-Djnlp.ENDPOINT=" + url,
-              "-Dplugin.cache.dir=" + StorageService.getCacheFolder(uuid, "cache"));
+              "-Dplugin.cache.dir=" + StorageService.getCacheFolder(uuid, "cache"), "-DSERVER_NAME="+serverProfile.getName());
 
           ClientLauncher.this.setVisible(true);
         } catch (Throwable t) {
