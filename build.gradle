@@ -1,0 +1,196 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'base'
+    id 'nebula.lint' version '9.3.4'
+    id 'com.github.hierynomus.license' version '0.15.0'
+}
+
+apply plugin: 'java'
+apply plugin: 'base'
+apply plugin: 'nebula.lint'
+apply plugin: 'com.github.hierynomus.license'
+apply plugin: "application"
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    implementation 'org.slf4j:slf4j-api:1.7.26'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    implementation 'org.jasypt:jasypt:1.9.2'
+    runtimeOnly 'org.slf4j:slf4j-simple:1.6.4'
+    testImplementation "junit:junit:$junitVersion"
+}
+
+group = 'org.apereo.openequella.adminconsole'
+version = artifactVersion
+mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
+
+// Gradlelint is broken: https://github.com/nebula-plugins/gradle-lint-plugin/issues/203
+gradleLint.rules = [/*'all-dependency', */'dependency-parentheses', 'duplicate-dependency-class']
+
+license {
+    strictCheck
+    header = file('LICENSE')
+}
+
+jar {
+    archiveFileName = 'admin.jar'
+    manifest {
+        attributes('Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Main-Class': mainClassName,
+                "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(' '))
+    }
+}
+
+final jreDownloadDir = file("$buildDir/jre-downloads")
+final jreExtractDir = {sys -> "${jreDownloadDir.absolutePath}/jre/${sys}"}
+final jarDir = "${buildDir}/libs"
+final launcherScripts = [
+    windows: 'Windows-launcher.bat',
+    linux: 'Linux-launcher.sh',
+    mac: 'Mac-launcher.sh'
+]
+
+class JreProperties {
+    String hash
+    String fileName
+    String getDownloadUrl() {"https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u212-b03/${fileName}"}
+    File getJre() {new File("build/jre-downloads/${fileName}")}
+}
+
+final jreProperties = [
+    windows: new JreProperties(
+            hash: 'c09bab89cd82483c371597c5c364094a145c1fbba43a1d3d7c3e350b89dedc89',
+            fileName: 'OpenJDK8U-jre_x64_windows_hotspot_8u212b03.zip'),
+    linux: new JreProperties(
+            hash: '74daf0b77a7fd679cbb3a6228e0efa8c4a90b7664aa057f211e34bbfb38640fb',
+            fileName: 'OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz'),
+    mac: new JreProperties(
+            hash: '80855320c42a3b06617c6e466c64df67731542a805972185b075ca6cb1222c7f',
+            fileName: 'OpenJDK8U-jre_x64_mac_hotspot_8u212b03.tar.gz')
+]
+
+task copyDependencies(type: Copy, description: 'Copy dependencies to /build/libs') {
+    from configurations.default
+    into(jarDir)
+}
+
+task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac') {
+    doFirst {
+        if (!jreDownloadDir.exists()) {
+            jreDownloadDir.mkdirs()
+        }
+        // Filter out entries that already have JRE downloaded
+        jreProperties.findAll {String sys, JreProperties props -> !props.jre.exists()}
+                .collect {String sys, JreProperties props ->
+            Thread.start {
+                println("Start downloading OpenJRE for ${sys}...")
+                new URL(props.downloadUrl as String).withInputStream {
+                    props.jre.newOutputStream() << it
+                }
+            }
+        }*.join()
+    }
+}
+// Execute downloadJre only when any one of three JREs is missing
+downloadJre.onlyIf {
+    jreProperties.any {sys,props ->
+        !props.jre.exists()
+    }
+}
+
+import java.security.MessageDigest
+static String calculateHash(File jre) {
+    MessageDigest.getInstance('SHA-256').with {
+        jre.eachByte(1024) {buff,len ->
+            update(buff, 0, len)
+        }
+        digest().encodeHex() as String
+    }
+}
+
+task checkJre(dependsOn: downloadJre, description: 'Check if the hash of each JRE is correct') {
+    doFirst {
+        if (jreProperties.any { String sys, JreProperties props ->
+            props.hash != calculateHash(props.jre)
+        }) {
+            throw new GradleException("Hash mismatch for downloaded JRE. Files may have been modified.")
+        }
+    }
+}
+// Execute checkJre only when downloadJre was not skipped
+checkJre.onlyIf {
+    downloadJre.didWork
+}
+
+task unzipJre(description: 'Unzip a JRE when the extract directory is missing', dependsOn: checkJre) {
+    doFirst {
+        // Find out unzipped JREs and extract them
+        jreProperties.findAll {String sys, JreProperties props ->
+            !new File(jreExtractDir(sys)).exists()
+        }.each {String sys, JreProperties props ->
+            println "Unzip JRE for ${sys}"
+            if (props.jre.name.endsWith('zip')) {
+                copy {
+                    from zipTree(props.jre)
+                    into file(jreExtractDir(sys))
+                }
+            } else {
+                copy {
+                    from tarTree(resources.gzip(props.jre))
+                    into file(jreExtractDir(sys))
+                }
+            }
+        }
+    }
+}
+// Execute unzipJre only when any one of three JRE extract folders is missing
+unzipJre.onlyIf {
+    jreProperties.any {String sys, JreProperties props->
+        !new File(jreExtractDir(sys)).exists()
+    }
+}
+
+distributions {
+    launcherScripts.each { String sys, String scriptFileName ->
+        String scriptFileDir = "${projectDir}/launcher-scripts/${scriptFileName}"
+        "${sys}Packages" {
+            baseName = "admin-console-package-for-${sys}"
+            contents {
+                from("${buildDir}") {
+                    include "libs/*"
+                }
+                from {file(jreExtractDir(sys))}
+                from {file(scriptFileDir)}
+            }
+        }
+    }
+}
+
+Object[] dependentTasks = [unzipJre,copyDependencies]
+build.dependsOn(dependentTasks)
+
+// We want TAR files to be compressed by GZIP with the file extension of '.tar.gz'
+tasks.withType(Tar){
+    compression = Compression.GZIP
+    archiveExtension = 'tar.gz'
+}
+
+// We do not need the default distributions that have no JRE bundled
+distTar.enabled = false
+distZip.enabled = false
+
+// We do not need tar for Windows and zip for both Mac and Linux.
+windowsPackagesDistTar.enabled = false
+linuxPackagesDistZip.enabled = false
+macPackagesDistZip.enabled = false
+
+// These plugin-generated distribution tasks must run after JREs are downloaded and unzipped.
+linuxPackagesDistTar.mustRunAfter(dependentTasks)
+macPackagesDistTar.mustRunAfter(dependentTasks)
+windowsPackagesDistZip.mustRunAfter(dependentTasks)
