@@ -14,15 +14,10 @@ install: true
 
 script:
   - ./gradlew build
-after_success:
-  - aws s3 --region us-east-1 cp --recursive build/distributions s3://oeq-admin-console-package/`printf%04d $TRAVIS_BUILD_NUMBER`/
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-
-before_deploy:
-  - git tag v1.0.1-beta1
 
 deploy:
   provider: releases
@@ -33,7 +28,6 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    repo: openequella/openEQUELLA-admin-console-package
     all_branches: true
     condition: $TRAVIS_BRANCH =~ ^(master|release)$
 
