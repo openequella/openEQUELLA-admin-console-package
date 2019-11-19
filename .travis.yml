@@ -28,6 +28,3 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    all_branches: true
-    condition: $TRAVIS_BRANCH =~ ^(master|release)$
-
