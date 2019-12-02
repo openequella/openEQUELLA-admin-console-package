@@ -21,13 +21,10 @@ before_cache:
 
 deploy:
   provider: releases
-  api_key:
-    secure: qNeNM5lLhByeDVJ3FKihyfSQv8/sUOCYRYSATOHtUi8DJLnDmi1TU//N911LQjIzncJZCNYef+HoSTWXxdIDP5BvkAbZ1izoRDaPFAr/sqdXb47hzvMxscVCwqZ+jaTDGB72MbS48dnXHYM0pT3+8Pnu3+BsiXkgBR+HW0MpyBzeV9TzQmiB4yc7IfmwZmxVZeNnM8SGztzOjHsi+D973sO7QZ1tIAahQ48QdJ2GFCLIGhIMVd/F3yfg22VlyZL6uu7+AHejpN2jXLAZEcAAHrIwGMCiC9pvuEXBf7LGl+WGOwEpncqNNRT9yACVrROO06lQQisJG3JBxuvPIN2+JShSEBbmHnM3FyZV4VBe8l5IzPN6oXCFQhSxK5fJWDnfs1O/iZANbxlqMzk7mHD0BPIkhEGCotNDS+WkIz64wyTh+oNzGlADlM5cQY1+/lCdJfH4Gp8M/ga4/t0c4sWBnPUtj5Kjxy3CIj7P5kKXoL5uKfzLddvZGdJE1GBrUJG07k0bLsIjjw04m15kS0r7/28qIrk+g8y6zJ7AeNMpCZ0PyG5F77zXx/5Ut4ayxqnbFG5Tc7LtgRie4pKF92uFN4rIWfmty1illSDbXjI7tNlVE9/zyl9d7aQ93jWfVTdMz5YZSY0kE1n9EQBtfRstENOKcAbVakj1TJ4TFq+kczw=
+  api-key:
+    secure: TXedn0kc5TaLol+/Hl1RoOKvhucANcgUMqQw5FxE4wUJfqxbqT5fVeLVPjn9II8G1tgkB8v1zqG+wMk3e264/vhyf3IA5DBVj0UX5a4X/QfMCO2iQFBoQ+DRFBWCM1szPbfNxwbO2kzr+laX7t/fOBA+ESHPv6d6BLR1Ll0sZaX1re4hQBPT12fpdm+7rx1Peb1u/4j56dxiYMkI1qUbvYzxmS6EgBHO4LtXxNEpw9IPknUCecWCl6tRbKgg1Xsppm9/LQMn9Xc64o7GLE+BD+rBy93QnCZJUHNcUZvK+D0TXGfRxffpkYs6ZBtU9PjSv/603a6N6gmrnyi/m9NDBLpbnRtvBIzRj0CupFFdeAe6pfhEdmQ4HbJGPxdb7BOndOc+waAI6ObT+3qCg138h8mbBW12O0pQRm+0XXrTM5aVWqklMKyprPK2q3GeJt1pBrBZcQpXw6MqG9aF95uz7L2cZ9sfVM4eVGR/diLq+9bSgieR3ZEqi/R0QvrgcGe+V5CuT+O3DxzBZbpdlvxB7f3EKEv23nJFwR7d/i54rCi/GNKhIBAt3vItm6dz5tX8PyyPAfNaRos0+wrmLVxwPFWVPPmttu1zNPRvmia8rv7stG94W5/4Z43DVQYjkbLYU6vND9ZoPtqKC82NuMePKcwKKW2w3XKr2JjRmsoulMc=
   file_glob: true
   file: build/distributions/*
   skip_cleanup: true
   on:
     tags: true
-    all_branches: true
-    condition: $TRAVIS_BRANCH =~ ^(master|release)$
-
