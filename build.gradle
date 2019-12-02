@@ -26,7 +26,7 @@ dependencies {
 }
 
 group = 'org.apereo.openequella.adminconsole'
-version = artifactVersion
+version = System.getenv("TRAVIS_TAG") ?: artifactVersion
 mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
 
 // Gradlelint is broken: https://github.com/nebula-plugins/gradle-lint-plugin/issues/203
