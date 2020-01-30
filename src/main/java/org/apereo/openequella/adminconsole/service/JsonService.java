@@ -24,12 +24,12 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 public class JsonService {
 	
-	private static final ObjectMapper jsonMapper = new ObjectMapper();
-	
+	private static final JsonMapper jsonMapper = new JsonMapper();
+
 	public static <T> T readFile(File file, Class<T> type){
 		try (final InputStream fis = new FileInputStream(file)) {
 			final T obj = jsonMapper.readValue(fis, type);
