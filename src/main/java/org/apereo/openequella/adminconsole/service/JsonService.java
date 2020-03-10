@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JsonService {
 	
 	private static final ObjectMapper jsonMapper = new ObjectMapper();
-	
+
 	public static <T> T readFile(File file, Class<T> type){
 		try (final InputStream fis = new FileInputStream(file)) {
 			final T obj = jsonMapper.readValue(fis, type);
