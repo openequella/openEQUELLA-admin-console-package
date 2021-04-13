@@ -42,8 +42,8 @@ These packages will be produced as part of the standard build task.
  ```
 
 ## Adding Root CA Certificates
-Self signing certificates can be very useful for local testing & development with SSL enabled. 
-If openEQUELLA is configured to use SSL with such a certificate, then the admin-console-package will fail to log in to the institution because of this error: 
+If openEQUELLA is configured to use SSL with a certificate that is not recognized by Java, (such as with a self-signed certificate, an internal CA, smaller/lesser known third party CAs)
+then the admin-console-package will fail to log in to the institution because of this error displayed in the terminal window: 
 
 ```
 Caused by: javax.net.ssl.SSLHandshakeException: sun.security.validator.ValidatorException: 
@@ -52,10 +52,17 @@ unable to find valid certification path to requested target
 ```
 
 This is because the Java Keystore used by the admin console package does not recognize the Root CA certificate used to sign openEQUELLA's SSL certificate.
-The admin console package uses its own copy of the JRE, in the `jdk8u242-b08-jre` folder. 
+
+The admin-console-package uses its own copy of the JRE, in the `jdk8u242-b08-jre` folder. 
 The keystore we need to update is within this folder, at the path `jdk8u242-b08-jre/lib/security/cacerts`.
 
-Java comes with a command line tool which you can use for updating these keystores, called `keytool`. This should work in Mac, Linux and Windows.
+The bundled JRE comes with a command line tool which you can use for updating these keystores, called `keytool`. 
+This should work in Mac, Linux and Windows. It is stored in `jdk8u242-b08-jre/bin`.
+
+#### NOTE:
+
+If Java is installed on your system it will have its own version of `keystore`. 
+You should use the one within the admin-console-package's bundled JRE rather than your system Java version, to ensure compatibility.
 
 You will need a copy of the Root CA certificate used to sign your SSL certificate saved as a .pem file for the following command's `-file` argument.
 
