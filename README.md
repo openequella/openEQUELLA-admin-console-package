@@ -63,12 +63,14 @@ You will need a copy of the Root CA certificate used to sign your SSL certificat
 
 `-storepass` must be `changeit` - unless you have specifically changed this password first, 
 in which case you should use whatever it was set to.
+
 ```
 keytool -import -trustcacerts -keystore path/to/adminconsolepackage/jdk8u242-b08-jre/lib/security/cacerts -storepass changeit -alias giveYourCertANameHere -file path/to/rootCA.pem
 ```
 
 The command will display the certificate and prompt the user to `Trust this certificate? [no]:`. Type `yes` and hit Enter.
 If successful, the response will be:
+
 `Certificate was added to keystore`.
 
 Now close and reopen the admin-console-package and attempt to log into your openEQUELLA's admin console. The error should be gone and login should be successful.
