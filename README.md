@@ -59,7 +59,7 @@ The keystore we need to update is within this folder, at the path `jdk8u242-b08-
 The bundled JRE comes with a command line tool which you can use for updating these keystores, called `keytool`. 
 This should work in Mac, Linux and Windows. It is stored in `jdk8u242-b08-jre/bin`.
 
-#### NOTE:
+**NOTE:**
 
 If Java is installed on your system it will have its own version of `keystore`. 
 You should use the one within the admin-console-package's bundled JRE rather than your system Java version, to ensure compatibility.
@@ -78,6 +78,6 @@ keytool -import -trustcacerts -keystore path/to/adminconsolepackage/jdk8u242-b08
 The command will display the certificate and prompt the user to `Trust this certificate? [no]:`. Type `yes` and hit Enter.
 If successful, the response will be:
 
-`Certificate was added to keystore`.
+    Certificate was added to keystore.
 
 Now close and reopen the admin-console-package and attempt to log into your openEQUELLA's admin console. The error should be gone and login should be successful.
