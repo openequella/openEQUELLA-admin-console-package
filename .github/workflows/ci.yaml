@@ -6,8 +6,6 @@ on:
       - master
       - develop
       - release/**
-    tags:
-      - "**"
   pull_request:
     branches:
       - master
@@ -44,4 +42,12 @@ jobs:
         with:
           name: Artefacts
           path: build/distributions
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: build/distributions/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
