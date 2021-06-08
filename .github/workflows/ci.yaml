@@ -45,6 +45,16 @@ jobs:
           name: Artefacts
           path: build/distributions
 
+      - name: Package Coverage Report
+        run: |
+          tar cvf coverage_report.tar build/reports/tests/test
+
+      - name: Save Coverage Report
+        uses: actions/upload-artifact@v2.2.3
+        with:
+          name: CoverageReport
+          path: coverage_report.tar
+
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
