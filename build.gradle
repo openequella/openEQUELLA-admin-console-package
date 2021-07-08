@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'base'
-    id 'nebula.lint' version '9.3.4'
+    id 'nebula.lint' version '16.26.0'
     id 'com.github.hierynomus.license' version '0.15.0'
 }
 
@@ -18,10 +18,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.slf4j:slf4j-api:1.7.26'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.2'
-    implementation 'org.jasypt:jasypt:1.9.2'
-    runtimeOnly 'org.slf4j:slf4j-simple:1.6.4'
+    implementation 'org.slf4j:slf4j-api:1.7.31'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+    implementation 'org.jasypt:jasypt:1.9.3'
+    runtimeOnly 'org.slf4j:slf4j-simple:1.7.31'
     testImplementation "junit:junit:$junitVersion"
 }
 
