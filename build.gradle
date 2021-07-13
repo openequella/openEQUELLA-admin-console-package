@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'base'
-    id 'nebula.lint' version '16.26.0'
+    id 'nebula.lint' version '17.0.0'
     id 'com.github.hierynomus.license' version '0.15.0'
 }
 
