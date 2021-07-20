@@ -21,7 +21,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.32'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
     implementation 'org.jasypt:jasypt:1.9.3'
-    runtimeOnly 'org.slf4j:slf4j-simple:1.7.31'
+    runtimeOnly 'org.slf4j:slf4j-simple:1.7.32'
     testImplementation "junit:junit:$junitVersion"
 }
 
