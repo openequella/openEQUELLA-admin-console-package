@@ -160,7 +160,7 @@ distributions {
     launcherScripts.each { String sys, String scriptFileName ->
         String scriptFileDir = "${projectDir}/launcher-scripts/${scriptFileName}"
         "${sys}Packages" {
-            baseName = "admin-console-package-for-${sys}"
+            distributionBaseName = "admin-console-package-for-${sys}"
             contents {
                 from("${buildDir}") {
                     include "libs/*"
