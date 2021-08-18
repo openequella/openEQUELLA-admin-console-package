@@ -12,7 +12,7 @@ apply plugin: "application"
 
 repositories {
     mavenLocal()
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
