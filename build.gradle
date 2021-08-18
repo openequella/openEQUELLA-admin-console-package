@@ -2,13 +2,11 @@ plugins {
     id 'java'
     id 'application'
     id 'base'
-    id 'nebula.lint' version '17.1.0'
-    id 'com.github.hierynomus.license' version '0.15.0'
+    id 'com.github.hierynomus.license' version '0.16.1'
 }
 
 apply plugin: 'java'
 apply plugin: 'base'
-apply plugin: 'nebula.lint'
 apply plugin: 'com.github.hierynomus.license'
 apply plugin: "application"
 
@@ -28,9 +26,6 @@ dependencies {
 group = 'org.apereo.openequella.adminconsole'
 version = System.getenv("TRAVIS_TAG") ?: artifactVersion
 mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
-
-// Gradlelint is broken: https://github.com/nebula-plugins/gradle-lint-plugin/issues/203
-gradleLint.rules = [/*'all-dependency', */'dependency-parentheses', 'duplicate-dependency-class']
 
 license {
     strictCheck
