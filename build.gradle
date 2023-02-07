@@ -54,20 +54,20 @@ final launcherScripts = [
 class JreProperties {
     String hash
     String fileName
-    String getDownloadUrl() {"https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u242-b08/${fileName}"}
+    String getDownloadUrl() {"https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.18%2B10/${fileName}"}
     File getJre() {new File("build/jre-downloads/${fileName}")}
 }
 
 final jreProperties = [
     windows: new JreProperties(
-            hash: 'b00c361e6ce022c6dc63b7c747cfdd9d28c17943e50bc1855adf36854ce46898',
-            fileName: 'OpenJDK8U-jre_x64_windows_hotspot_8u242b08.zip'),
+            hash: 'dea0fe7fd5fc52cf5e1d3db08846b6a26238cfcc36d5527d1da6e3cb059071b3',
+            fileName: 'OpenJDK11U-jre_x64_windows_hotspot_11.0.18_10.zip'),
     linux: new JreProperties(
-            hash: '5edfaefdbb0469d8b24d61c8aef80c076611053b1738029c0232b9a632fe2708',
-            fileName: 'OpenJDK8U-jre_x64_linux_hotspot_8u242b08.tar.gz'),
+            hash: '0e7b196ef8603ac3d38caaf7768b7b0a3c613d60e15a6511bcfb2c894b609e99',
+            fileName: 'OpenJDK11U-jre_x64_linux_hotspot_11.0.18_10.tar.gz'),
     mac: new JreProperties(
-            hash: 'fae3777e3441dc7384c339a9054aa7efc40cd2c501625a535c2d4648367ccca3',
-            fileName: 'OpenJDK8U-jre_x64_mac_hotspot_8u242b08.tar.gz')
+            hash: '7c73b1a731fc840f2ecb5633906d687bfee4346a8191d3cb1c4370168b16351f',
+            fileName: 'OpenJDK11U-jre_x64_mac_hotspot_11.0.18_10.tar.gz')
 ]
 
 task copyDependencies(type: Copy, description: 'Copy dependencies to /build/libs') {
@@ -130,16 +130,9 @@ task unzipJre(description: 'Unzip a JRE when the extract directory is missing', 
             !new File(jreExtractDir(sys)).exists()
         }.each {String sys, JreProperties props ->
             println "Unzip JRE for ${sys}"
-            if (props.jre.name.endsWith('zip')) {
-                copy {
-                    from zipTree(props.jre)
-                    into file(jreExtractDir(sys))
-                }
-            } else {
-                copy {
-                    from tarTree(resources.gzip(props.jre))
-                    into file(jreExtractDir(sys))
-                }
+            copy {
+                from props.jre.name.endsWith('zip') ? zipTree(props.jre) : tarTree(resources.gzip(props.jre))
+                into file(jreExtractDir(sys))
             }
         }
     }
