@@ -53,11 +53,11 @@ unable to find valid certification path to requested target
 
 This is because the Java Keystore used by the admin console package does not recognize the Root CA certificate used to sign openEQUELLA's SSL certificate.
 
-The admin-console-package uses its own copy of the JRE, in the `jdk8u242-b08-jre` folder. 
-The keystore we need to update is within this folder, at the path `jdk8u242-b08-jre/lib/security/cacerts`.
+The admin-console-package uses its own copy of the JRE, in the `jdk-11.0.18+10-jre` folder. 
+The keystore we need to update is within this folder, at the path `jdk-11.0.18+10-jre/lib/security/cacerts`.
 
 The bundled JRE comes with a command line tool which you can use for updating these keystores, called `keytool`. 
-This should work in Mac, Linux and Windows. It is stored in `jdk8u242-b08-jre/bin`.
+This should work in Mac, Linux and Windows. It is stored in `jdk-11.0.18+10-jre/bin`.
 
 **NOTE:**
 
@@ -72,7 +72,7 @@ You will need a copy of the Root CA certificate used to sign your SSL certificat
 in which case you should use whatever it was set to.
 
 ```
-keytool -import -trustcacerts -keystore path/to/adminconsolepackage/jdk8u242-b08-jre/lib/security/cacerts -storepass changeit -alias giveYourCertANameHere -file path/to/rootCA.pem
+keytool -import -trustcacerts -keystore path/to/adminconsolepackage/jdk-11.0.18+10-jre/lib/security/cacerts -storepass changeit -alias giveYourCertANameHere -file path/to/rootCA.pem
 ```
 
 The command will display the certificate and prompt the user to `Trust this certificate? [no]:`. Type `yes` and hit Enter.
