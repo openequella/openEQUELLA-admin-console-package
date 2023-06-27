@@ -39,6 +39,10 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
+      - name: Generate artefact hashes
+        run: ../../generate-hashes.sh *
+        working-directory: build/distributions
+
       - name: Save artefacts
         uses: actions/upload-artifact@v3.1.2
         with:
