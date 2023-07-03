@@ -1,4 +1,4 @@
-name: openEQUELLA Admin Console Launcer CI
+name: openEQUELLA Admin Console Launcher CI
 
 on:
   push:
@@ -30,23 +30,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Set up JDK 1.8
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: adopt
-          java-version: 8
+          distribution: temurin
+          java-version: 11
 
       - name: Build with Gradle
         run: ./gradlew build
 
+      - name: Generate artefact hashes
+        run: ../../generate-hashes.sh *
+        working-directory: build/distributions
+
       - name: Save artefacts
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: Artefacts
           path: build/distributions
 
       - name: Save Coverage Report
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: CoverageReport
           path: build/reports/tests/test
@@ -58,4 +62,3 @@ jobs:
           files: build/distributions/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
