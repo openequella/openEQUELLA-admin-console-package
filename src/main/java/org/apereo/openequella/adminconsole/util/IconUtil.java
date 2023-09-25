@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class IconUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IconUtil.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IconUtil.class);
   private static final int[] ICON_SIZES = {16, 24, 32, 48, 64, 72, 96, 128, 256};
   public static final List<Image> ICONS;
 
