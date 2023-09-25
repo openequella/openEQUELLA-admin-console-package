@@ -26,6 +26,7 @@ import org.apereo.openequella.adminconsole.swing.ComponentHelper;
 import org.apereo.openequella.adminconsole.swing.ServerPicker;
 import org.apereo.openequella.adminconsole.swing.TableLayout;
 import org.apereo.openequella.adminconsole.util.BlindSSLSocketFactory;
+import org.apereo.openequella.adminconsole.util.IconUtil;
 import org.apereo.openequella.adminconsole.util.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,6 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
   private final JButton makeDefaultServerButton;
   private final JButton editProxyButton;
   private final JButton launchButton;
-  private final Image icon;
 
   public static void main(String args[]) throws Exception {
     new ClientLauncher();
@@ -92,8 +92,8 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
       makeDefaultServerButton = new JButton(MAKE_DEFAULT_SERVER_BUTTON);
       launchButton = new JButton(LAUNCH_BUTTON);
 
-      icon = new ImageIcon(getClass().getResource("/adminconsoleicon.png")).getImage();
-      setIconImage(icon);
+      setIconImages(IconUtil.ICONS);
+
       setTitle(WINDOW_TITLE);
       setResizable(false);
       addWindowListener(this);
@@ -194,7 +194,7 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
 
   private void launch(final ServerProfile serverProfile) {
     final SwingWorker<Object, Object> worker = new SwingWorker<Object, Object>() {
-      final LoadingDialog loadingDialog = new LoadingDialog(ClientLauncher.this, icon, LOADING_DIALOG_TITLE);
+      final LoadingDialog loadingDialog = new LoadingDialog(ClientLauncher.this, IconUtil.ICONS, LOADING_DIALOG_TITLE);
 
       @Override
       public Object doInBackground() throws Exception {
