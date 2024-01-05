@@ -25,7 +25,9 @@ dependencies {
 
 group = 'org.apereo.openequella.adminconsole'
 version = System.getenv("TRAVIS_TAG") ?: artifactVersion
-mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
+application {
+    mainClass = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
+}
 
 license {
     strictCheck
@@ -37,14 +39,15 @@ jar {
     manifest {
         attributes('Implementation-Title': project.name,
                 'Implementation-Version': project.version,
-                'Main-Class': mainClassName,
+                'Main-Class': application.mainClass,
                 "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(' '))
     }
 }
 
-final jreDownloadDir = file("$buildDir/jre-downloads")
+final buildDirectory = getLayout().getBuildDirectory()
+final jreDownloadDir = buildDirectory.dir("jre-downloads").get().asFile
 final jreExtractDir = {sys -> "${jreDownloadDir.absolutePath}/jre/${sys}"}
-final jarDir = "${buildDir}/libs"
+final jarDir = buildDirectory.dir("libs").get().asFile
 final launcherScripts = [
     windows: 'Windows-launcher.bat',
     linux: 'Linux-launcher.sh',
@@ -71,9 +74,10 @@ final jreProperties = [
 ]
 
 task copyDependencies(type: Copy, description: 'Copy dependencies to /build/libs') {
-    from configurations.default
+    from configurations.runtimeClasspath
     into(jarDir)
 }
+copyDependencies.mustRunAfter(startScripts)
 
 task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac') {
     doFirst {
@@ -85,7 +89,7 @@ task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac') {
                 .collect {String sys, JreProperties props ->
             Thread.start {
                 println("Start downloading OpenJRE for ${sys}...")
-                new URL(props.downloadUrl as String).withInputStream {
+                new URI(props.downloadUrl as String).toURL().withInputStream {
                     props.jre.newOutputStream() << it
                 }
             }
@@ -150,8 +154,8 @@ distributions {
         "${sys}Packages" {
             distributionBaseName = "admin-console-package-for-${sys}"
             contents {
-                from("${buildDir}") {
-                    include "libs/*"
+                into("libs") {
+                    from {jarDir}
                 }
                 from {file(jreExtractDir(sys))}
                 from {file(scriptFileDir)}

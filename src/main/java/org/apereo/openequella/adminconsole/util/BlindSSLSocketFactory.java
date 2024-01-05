@@ -36,7 +36,7 @@ import javax.net.ssl.X509TrustManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BlindSSLSocketFactory extends SSLSocketFactory {
+public class BlindSSLSocketFactory extends SSLSocketFactory implements AutoCloseable {
   private static final Logger LOGGER = LoggerFactory.getLogger(BlindSSLSocketFactory.class);
   private static SSLSocketFactory originalFactory;
   private static HostnameVerifier originalHostnameVerifier;
@@ -102,17 +102,6 @@ public class BlindSSLSocketFactory extends SSLSocketFactory {
   }
 
   @Override
-  protected void finalize() throws Throwable {
-    if (originalFactory != null) {
-      HttpsURLConnection.setDefaultSSLSocketFactory(originalFactory);
-    }
-    if (originalHostnameVerifier != null) {
-      HttpsURLConnection.setDefaultHostnameVerifier(originalHostnameVerifier);
-    }
-    super.finalize();
-  }
-
-  @Override
   public Socket createSocket(String arg0, int arg1) throws IOException {
     return blindFactory.createSocket(arg0, arg1);
   }
@@ -146,5 +135,15 @@ public class BlindSSLSocketFactory extends SSLSocketFactory {
   @Override
   public String[] getSupportedCipherSuites() {
     return blindFactory.getSupportedCipherSuites();
+  }
+
+  @Override
+  public void close() {
+    if (originalFactory != null) {
+      HttpsURLConnection.setDefaultSSLSocketFactory(originalFactory);
+    }
+    if (originalHostnameVerifier != null) {
+      HttpsURLConnection.setDefaultHostnameVerifier(originalHostnameVerifier);
+    }
   }
 }
