@@ -16,16 +16,18 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.slf4j:slf4j-api:2.0.7'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'org.slf4j:slf4j-api:2.0.11'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
     implementation 'org.jasypt:jasypt:1.9.3'
-    runtimeOnly 'org.slf4j:slf4j-simple:2.0.7'
+    runtimeOnly 'org.slf4j:slf4j-simple:2.0.11'
     testImplementation "junit:junit:$junitVersion"
 }
 
 group = 'org.apereo.openequella.adminconsole'
 version = System.getenv("TRAVIS_TAG") ?: artifactVersion
-mainClassName = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
+application {
+    mainClass = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
+}
 
 license {
     strictCheck
@@ -37,14 +39,15 @@ jar {
     manifest {
         attributes('Implementation-Title': project.name,
                 'Implementation-Version': project.version,
-                'Main-Class': mainClassName,
+                'Main-Class': application.mainClass,
                 "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(' '))
     }
 }
 
-final jreDownloadDir = file("$buildDir/jre-downloads")
+final buildDirectory = getLayout().getBuildDirectory()
+final jreDownloadDir = buildDirectory.dir("jre-downloads").get().asFile
 final jreExtractDir = {sys -> "${jreDownloadDir.absolutePath}/jre/${sys}"}
-final jarDir = "${buildDir}/libs"
+final jarDir = buildDirectory.dir("libs").get().asFile
 final launcherScripts = [
     windows: 'Windows-launcher.bat',
     linux: 'Linux-launcher.sh',
@@ -54,26 +57,27 @@ final launcherScripts = [
 class JreProperties {
     String hash
     String fileName
-    String getDownloadUrl() {"https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.18%2B10/${fileName}"}
+    String getDownloadUrl() {"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/${fileName}"}
     File getJre() {new File("build/jre-downloads/${fileName}")}
 }
 
 final jreProperties = [
     windows: new JreProperties(
-            hash: 'dea0fe7fd5fc52cf5e1d3db08846b6a26238cfcc36d5527d1da6e3cb059071b3',
-            fileName: 'OpenJDK11U-jre_x64_windows_hotspot_11.0.18_10.zip'),
+            hash: '38bb68f9db9c85a63496570c53a1bcbac18c808677595d7e939d2f5b38e9a7aa',
+            fileName: 'OpenJDK21U-jre_x64_windows_hotspot_21.0.1_12.zip'),
     linux: new JreProperties(
-            hash: '0e7b196ef8603ac3d38caaf7768b7b0a3c613d60e15a6511bcfb2c894b609e99',
-            fileName: 'OpenJDK11U-jre_x64_linux_hotspot_11.0.18_10.tar.gz'),
+            hash: '277f4084bee875f127a978253cfbaad09c08df597feaf5ccc82d2206962279a3',
+            fileName: 'OpenJDK21U-jre_x64_linux_hotspot_21.0.1_12.tar.gz'),
     mac: new JreProperties(
-            hash: '7c73b1a731fc840f2ecb5633906d687bfee4346a8191d3cb1c4370168b16351f',
-            fileName: 'OpenJDK11U-jre_x64_mac_hotspot_11.0.18_10.tar.gz')
+            hash: 'c21a2648ec21bc4701acfb6b7a1fd90aca001db1efb8454e2980d4c8dcd9e310',
+            fileName: 'OpenJDK21U-jre_x64_mac_hotspot_21.0.1_12.tar.gz')
 ]
 
 task copyDependencies(type: Copy, description: 'Copy dependencies to /build/libs') {
-    from configurations.default
+    from configurations.runtimeClasspath
     into(jarDir)
 }
+copyDependencies.mustRunAfter(startScripts)
 
 task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac') {
     doFirst {
@@ -85,7 +89,7 @@ task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac') {
                 .collect {String sys, JreProperties props ->
             Thread.start {
                 println("Start downloading OpenJRE for ${sys}...")
-                new URL(props.downloadUrl as String).withInputStream {
+                new URI(props.downloadUrl as String).toURL().withInputStream {
                     props.jre.newOutputStream() << it
                 }
             }
@@ -150,8 +154,8 @@ distributions {
         "${sys}Packages" {
             distributionBaseName = "admin-console-package-for-${sys}"
             contents {
-                from("${buildDir}") {
-                    include "libs/*"
+                into("libs") {
+                    from {jarDir}
                 }
                 from {file(jreExtractDir(sys))}
                 from {file(scriptFileDir)}

@@ -19,6 +19,7 @@ package org.apereo.openequella.adminconsole.launcher;
 
 import java.awt.Dimension;
 import java.awt.Image;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -29,12 +30,12 @@ import org.apereo.openequella.adminconsole.swing.ComponentHelper;
 public class LoadingDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 
-	public LoadingDialog(JFrame parent, Image icon, String title) {
+	public LoadingDialog(JFrame parent, List<Image> icons, String title) {
 		super(parent);
 		setTitle(title);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		setUndecorated(true);
-		setIconImage(icon);
+		setIconImages(icons);
 		setSize(new Dimension(200, 30));
 		final JProgressBar loadingProgressBar = new JProgressBar();
 		loadingProgressBar.setIndeterminate(true);

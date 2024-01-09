@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -84,7 +85,7 @@ public class JarService {
 			// hit the server to download
 			//final URL url = new URL(baseUrl + "/console.do?jar=" + URLEncoder.encode(jarName + ".jar", "utf-8"));
 			final String strUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + "adminconsole.jar";
-			final URL url = new URL(strUrl);
+			final URL url = new URI(strUrl).toURL();
 			HttpURLConnection conn = null;
 			try {
 				conn = (HttpURLConnection) url.openConnection();
