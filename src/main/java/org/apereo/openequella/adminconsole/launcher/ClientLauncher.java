@@ -219,8 +219,14 @@ public class ClientLauncher extends JFrame implements ActionListener, WindowList
           jarService.ensureBinJars(jarName);
           loadingDialog.setVisible(false);
 
-          jarService.executeJar(jarName, "com.tle.admin.boot.Bootstrap", "-Djnlp.ENDPOINT=" + url,
-              "-Dplugin.cache.dir=" + StorageService.getCacheFolder(uuid, "cache"), "-DSERVER_NAME=" + serverProfile.getName());
+          jarService.executeJar(
+                  jarName,
+                  "com.tle.admin.boot.Bootstrap",
+                  "-Djnlp.ENDPOINT=" + url,
+                  "-Dplugin.cache.dir=" + StorageService.getCacheFolder(uuid, "cache"),
+                  "-DSERVER_NAME=" + serverProfile.getName(),
+                  "--add-opens=java.base/java.util=ALL-UNNAMED"
+          );
 
           ClientLauncher.this.setVisible(true);
         } catch (Throwable t) {
