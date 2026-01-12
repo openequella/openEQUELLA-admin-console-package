@@ -57,20 +57,20 @@ final launcherScripts = [
 class JreProperties {
     String hash
     String fileName
-    String getDownloadUrl() {"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/${fileName}"}
+    String getDownloadUrl() {"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/${fileName}"}
     File getJre() {new File("build/jre-downloads/${fileName}")}
 }
 
 final jreProperties = [
     windows: new JreProperties(
-            hash: '38bb68f9db9c85a63496570c53a1bcbac18c808677595d7e939d2f5b38e9a7aa',
-            fileName: 'OpenJDK21U-jre_x64_windows_hotspot_21.0.1_12.zip'),
+            hash: '39c5e23f3ce4d420663afba8ffde28034b72e2b3e240943dc2321bc1f912eef9',
+            fileName: 'OpenJDK21U-jre_x64_windows_hotspot_21.0.9_10.zip'),
     linux: new JreProperties(
-            hash: '277f4084bee875f127a978253cfbaad09c08df597feaf5ccc82d2206962279a3',
-            fileName: 'OpenJDK21U-jre_x64_linux_hotspot_21.0.1_12.tar.gz'),
+            hash: 'aeab55d064a1a27a3744b0880b9b414077b4ed2b1790817eea3df60aec946431',
+            fileName: 'OpenJDK21U-jre_x64_linux_hotspot_21.0.9_10.tar.gz'),
     mac: new JreProperties(
-            hash: 'c21a2648ec21bc4701acfb6b7a1fd90aca001db1efb8454e2980d4c8dcd9e310',
-            fileName: 'OpenJDK21U-jre_x64_mac_hotspot_21.0.1_12.tar.gz')
+            hash: '945abc49249f1e89a2a6a008d70d63dc42b25bbe5e1711ff97aeec70063008d2',
+            fileName: 'OpenJDK21U-jre_x64_mac_hotspot_21.0.9_10.tar.gz')
 ]
 
 task copyDependencies(type: Copy, description: 'Copy dependencies to /build/libs') {
