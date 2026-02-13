@@ -73,27 +73,29 @@ final jreProperties = [
             fileName: 'OpenJDK21U-jre_x64_mac_hotspot_21.0.9_10.tar.gz')
 ]
 
-task copyDependencies(type: Copy, description: 'Copy dependencies to /build/libs') {
+tasks.register('copyDependencies', Copy) {
+    description = 'Copy dependencies to /build/libs'
     from configurations.runtimeClasspath
     into(jarDir)
 }
 copyDependencies.mustRunAfter(startScripts)
 
-task downloadJre(description: 'Download OpenJRE of Linux, Windows and Mac') {
+tasks.register('downloadJre') {
+    description = 'Download OpenJRE of Linux, Windows and Mac'
     doFirst {
         if (!jreDownloadDir.exists()) {
             jreDownloadDir.mkdirs()
         }
         // Filter out entries that already have JRE downloaded
-        jreProperties.findAll {String sys, JreProperties props -> !props.jre.exists()}
-                .collect {String sys, JreProperties props ->
-            Thread.start {
-                println("Start downloading OpenJRE for ${sys}...")
-                new URI(props.downloadUrl as String).toURL().withInputStream {
-                    props.jre.newOutputStream() << it
-                }
-            }
-        }*.join()
+        jreProperties.findAll { String sys, JreProperties props -> !props.jre.exists() }
+                .collect { String sys, JreProperties props ->
+                    Thread.start {
+                        println("Start downloading OpenJRE for ${sys}...")
+                        new URI(props.downloadUrl as String).toURL().withInputStream {
+                            props.jre.newOutputStream() << it
+                        }
+                    }
+                }*.join()
     }
 }
 // Execute downloadJre only when any one of three JREs is missing
@@ -113,7 +115,9 @@ static String calculateHash(File jre) {
     }
 }
 
-task checkJre(dependsOn: downloadJre, description: 'Check if the hash of each JRE is correct') {
+tasks.register('checkJre') {
+    description = 'Check if the hash of each JRE is correct'
+    dependsOn downloadJre
     doFirst {
         if (jreProperties.any { String sys, JreProperties props ->
             props.hash != calculateHash(props.jre)
@@ -127,12 +131,14 @@ checkJre.onlyIf {
     downloadJre.didWork
 }
 
-task unzipJre(description: 'Unzip a JRE when the extract directory is missing', dependsOn: checkJre) {
+tasks.register('unzipJre') {
+    description = 'Unzip a JRE when the extract directory is missing'
+    dependsOn checkJre
     doFirst {
         // Find out unzipped JREs and extract them
-        jreProperties.findAll {String sys, JreProperties props ->
+        jreProperties.findAll { String sys, JreProperties props ->
             !new File(jreExtractDir(sys)).exists()
-        }.each {String sys, JreProperties props ->
+        }.each { String sys, JreProperties props ->
             println "Unzip JRE for ${sys}"
             copy {
                 from props.jre.name.endsWith('zip') ? zipTree(props.jre) : tarTree(resources.gzip(props.jre))
@@ -168,7 +174,7 @@ Object[] dependentTasks = [unzipJre,copyDependencies]
 build.dependsOn(dependentTasks)
 
 // We want TAR files to be compressed by GZIP with the file extension of '.tar.gz'
-tasks.withType(Tar){
+tasks.withType(Tar).configureEach {
     compression = Compression.GZIP
     archiveExtension = 'tar.gz'
 }
