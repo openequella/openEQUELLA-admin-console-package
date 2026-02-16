@@ -2,13 +2,8 @@ plugins {
     id 'java'
     id 'application'
     id 'base'
-    id 'com.github.hierynomus.license' version '0.16.1'
+    id 'checkstyle'
 }
-
-apply plugin: 'java'
-apply plugin: 'base'
-apply plugin: 'com.github.hierynomus.license'
-apply plugin: "application"
 
 repositories {
     mavenLocal()
@@ -29,9 +24,12 @@ application {
     mainClass = 'org.apereo.openequella.adminconsole.launcher.ClientLauncher'
 }
 
-license {
-    strictCheck
-    header = file('LICENSE')
+checkstyle {
+    toolVersion = '13.2.0'
+    configFile = file("${projectDir}/config/checkstyle/checkstyle.xml")
+    configProperties = [
+        'config.folder': file("${projectDir}/config/checkstyle").absolutePath
+    ]
 }
 
 jar {
