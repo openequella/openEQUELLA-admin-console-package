@@ -13,20 +13,23 @@ For development, you can run the app via:
 ~$ ./gradlew run --console=verbose
 ```
 
-## Apereo Header validation
-The gradle build includes a task which will check that each source file in the common and configurator projects has an Apereo 
-license notice at the top of the file. This license is stored in `LICENSE` in the root of this repository.
-In order to apply the headers, run:
+## Apereo License Header Validation
+The Gradle build uses Checkstyle to validate that each Java source file has an Apereo 
+license notice at the top of the file. The license header template is stored in `config/checkstyle/license.header`.
+
+To check that the headers are present, run:
 
 ```
--$ ./gradlew licenseFormat
+~$ ./gradlew checkstyleMain checkstyleTest
 ```
- In order to check that the headers have been applied, run:
- 
- ```
- -$ ./gradlew license
- ```
-NOTE: The license check is executed as part of the standard `build` target.
+
+Or simply run the standard check task:
+
+```
+~$ ./gradlew check
+```
+
+**NOTE:** The license header check is executed as part of the standard `build` target. If headers are missing, you will need to manually add them to the affected files using the template in `config/checkstyle/license.header`.
 
 ## Creating packages for Linux, Windows and Mac
 The gradle build includes a task which creates three packages by bundling OpenJDK, all dependencies of this project and a system-specific launcher script.
