@@ -31,6 +31,13 @@ Or simply run the standard check task:
 
 **NOTE:** The license header check is executed as part of the standard `build` target. If headers are missing, you will need to manually add them to the affected files using the template in `config/checkstyle/license.header`.
 
+## Dependency license report
+
+A detailed list of third-party dependency licenses is generated into `DEPENDENCY_LICENSES.md`.
+
+To regenerate:
+`./gradlew generateLicenseReport`
+
 ## Creating packages for Linux, Windows and Mac
 The gradle build includes a task which creates three packages by bundling OpenJDK, all dependencies of this project and a system-specific launcher script.
 

@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'base'
     id 'checkstyle'
+    id 'com.github.jk1.dependency-license-report' version '3.1.1'
 }
 
 repositories {
@@ -30,6 +31,15 @@ checkstyle {
     configProperties = [
         'config.folder': file("${projectDir}/config/checkstyle").absolutePath
     ]
+}
+
+import com.github.jk1.license.render.InventoryMarkdownReportRenderer
+// Generate a markdown report for dependencies and their licenses, and put it in the root directory of the project.
+licenseReport {
+    renderers = [
+        new InventoryMarkdownReportRenderer("DEPENDENCY_LICENSES.md", "Dependency Licenses")
+    ]
+    outputDir = rootDir.absolutePath
 }
 
 jar {
