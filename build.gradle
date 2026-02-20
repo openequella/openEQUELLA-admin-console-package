@@ -41,7 +41,7 @@ licenseReport {
         new InventoryMarkdownReportRenderer("DEPENDENCY_LICENSES.md", "Dependency Licenses")
     ]
     // Normalize the license names to make them more readable and consistent in the report, and remove duplicates.
-    // For example, "The Apache Software License, Version 2.0" and "Apache License 2.0" will both be normalized to "Apache License 2.0".
+    // For example, "The Apache Software License, Version 2.0" and "Apache License, Version 2.0" are both normalized to "Apache License, Version 2.0".
     filters = [ new LicenseBundleNormalizer() ]
     outputDir = rootDir.absolutePath
 }
