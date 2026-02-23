@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'base'
     id 'checkstyle'
+    id 'com.github.jk1.dependency-license-report' version '3.1.1'
 }
 
 repositories {
@@ -30,6 +31,19 @@ checkstyle {
     configProperties = [
         'config.folder': file("${projectDir}/config/checkstyle").absolutePath
     ]
+}
+
+import com.github.jk1.license.render.InventoryMarkdownReportRenderer
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+// Generate a markdown report for dependencies and their licenses, and put it in the root directory of the project.
+licenseReport {
+    renderers = [
+        new InventoryMarkdownReportRenderer("DEPENDENCY_LICENSES.md", "Dependency Licenses")
+    ]
+    // Normalize the license names to make them more readable and consistent in the report, and remove duplicates.
+    // For example, "The Apache Software License, Version 2.0" and "Apache License, Version 2.0" are both normalized to "Apache License, Version 2.0".
+    filters = [ new LicenseBundleNormalizer() ]
+    outputDir = rootDir.absolutePath
 }
 
 jar {
