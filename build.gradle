@@ -26,7 +26,7 @@ application {
 }
 
 checkstyle {
-    toolVersion = '13.2.0'
+    toolVersion = '13.4.2'
     configFile = file("${projectDir}/config/checkstyle/checkstyle.xml")
     configProperties = [
         'config.folder': file("${projectDir}/config/checkstyle").absolutePath
