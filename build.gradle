@@ -3,7 +3,7 @@ plugins {
     id 'application'
     id 'base'
     id 'checkstyle'
-    id 'com.github.jk1.dependency-license-report' version '3.1.1'
+    id 'com.github.jk1.dependency-license-report' version '3.1.2'
 }
 
 repositories {
